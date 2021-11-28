@@ -1,0 +1,10 @@
+.historique button {
+    color: #fff;
+    background: #012557;
+    font-size: 18px;
+    margin-top: 5px;
+    margin-left: 5px;
+    width: 10%;
+    height: 4vh;
+    cursor: pointer;
+}

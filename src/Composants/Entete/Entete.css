@@ -1,0 +1,44 @@
+.entete {
+    background: #0e771a;
+    color: #f1f1f1;
+    /* height: 10vh; */
+    display: flex;
+    /* align-items: center; */
+    /* justify-content: center; */
+    position: relative;
+    transition: .2s;
+}
+
+.entete h3 {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    cursor: pointer;
+    padding-top: 2px;
+}
+
+.entete h1 {
+    width: 100%;
+    padding-left: 80px;
+}
+
+.entete button {
+    display: block;
+    color: #012557;
+    font-size: 18px;
+    margin-top: 25px;
+    width: 42%;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+.entete .box-entete {
+    width: 50%;
+    /* display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    position: absolute;
+    left: 10px;
+    top: -5px; */
+}

@@ -1,0 +1,70 @@
+.container-vue .container-gestion {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.container-vue .container-gestion .box-1 {
+    width: 30%;
+    margin-right: 10px;
+}
+
+.container-vue .container-gestion .box-2 {
+    width: 100%;
+}
+
+.container-vue .container-gestion .box-1 .search-zone input {
+    width: 90%;
+    height: 5vh;
+    outline: none;
+    border-radius: 5px;
+    color: #0e771a;
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  
+.container-vue .container-gestion .box-1 .search-zone input:focus {
+    border: 2px solid #0e771a;
+}
+
+.container-vue h1 {
+    background: #0e771a;
+    color: #f1f1f1;
+    text-align: center;
+    font-size: larger;
+}
+
+.container-vue .container-gestion ul{
+    border: 1px solid gray;
+    overflow-y: auto;
+    position: relative;
+    height: 60vh;
+}
+
+.container-vue .container-gestion ul li {
+    color: #0e771a;
+    font-weight: 600;
+    width: 100%;
+    padding: 0px 5px;
+}
+
+.container-vue .container-gestion ul li:hover {
+    background-color: #0e771a;
+    color: #f1f1f1;
+    cursor: pointer;
+}
+
+.container-vue table {
+    border-spacing: 0px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.container-vue table thead {
+    background: #0e771a;
+    color: #f1f1f1;
+}
+
+.container-vue table thead tr td, .container-vue table tbody tr td {
+    text-align: center;
+}

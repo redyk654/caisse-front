@@ -1,0 +1,89 @@
+.gestion-recette .container-gestion {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.gestion-recette .container-gestion .box-1 {
+    width: 30%;
+    margin-right: 10px;
+}
+
+.gestion-recette .container-gestion .box-2 {
+    width: 100%;
+}
+
+.gestion-recette h1 {
+    background: #0e771a;
+    color: #f1f1f1;
+    text-align: center;
+    font-size: larger;
+}
+
+.gestion-recette .container-gestion ul{
+    border: 1px solid gray;
+    overflow-y: auto;
+    position: relative;
+    height: 60vh;
+}
+
+.gestion-recette .container-gestion ul li {
+    color: #0e771a;
+    font-weight: 600;
+    width: 100%;
+    padding: 0px 5px;
+}
+
+.gestion-recette .container-gestion ul li:hover {
+    background-color: #0e771a;
+    color: #f1f1f1;
+    cursor: pointer;
+}
+
+li {
+    color: #0e771a;
+    font-weight: 600;
+    width: 100%;
+    padding: 0px 5px;
+}
+
+li:hover {
+    background-color: #0e771a;
+    color: #f1f1f1;
+    cursor: pointer;
+}
+
+.gestion-recette table {
+    border-spacing: 0px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.gestion-recette table thead {
+    background: #0e771a;
+    color: #f1f1f1;
+}
+
+.gestion-recette table thead tr td, .gestion-recette table tbody tr td {
+    text-align: center;
+}
+
+.gestion-recette .btn-container button {
+    color: #fff;
+    background: #012557;
+    font-size: 18px;
+    margin: 5px;
+    width: 15%;
+    height: 4vh;
+    cursor: pointer;
+}
+
+.gestion-recette .container-gestion .box-2 .btn-valid-annul button {
+    color: #fff;
+    background: #012557;
+    font-size: 18px;
+    margin: 5px;
+    width: 15%;
+    height: 4vh;
+    cursor: pointer;
+}
