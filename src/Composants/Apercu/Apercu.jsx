@@ -271,6 +271,7 @@ export default function Apercu(props) {
                     ref={componentRef}
                     historique={historique}
                     total={reccetteTotal}
+                    nomConnecte={props.nomConnecte}
                 />
             </div>
         </section>

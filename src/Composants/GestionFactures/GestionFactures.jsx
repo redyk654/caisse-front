@@ -299,11 +299,11 @@ export default function GestionFactures(props) {
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>
                     <input type="checkbox" name="non_regle" id="non_regle" checked={filtrer} onChange={() => setFiltrer(!filtrer)} />
                 </p>
-                <div>
+                {/* <div>
                     {filtrer ? (
                         <div>Total non réglés: <span style={{fontWeight: 700}}>{manquantTotal == null ? '0 Fcfa' : manquantTotal + ' Fcfa'}</span></div>
                         ) : null}
-                </div>
+                </div> */}
                 <h3>{filtrer ? 'Factures non réglés' : 'Factures'}</h3>
                 <ul>
                     {factures.length > 0 ? factures.map(item => (

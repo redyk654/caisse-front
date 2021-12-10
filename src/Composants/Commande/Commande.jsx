@@ -372,9 +372,13 @@ export default function Commande(props) {
             if(patient.length === 0) {
                 const data = new FormData();
                 data.append('nom_patient', nomPatient);
+                data.append('assurance', assuranceDefaut);
+                data.append('type_assurance', 0);        
                 
                 const req = new XMLHttpRequest();
                 req.open('POST', 'http://serveur/backend-cma/gestion_patients.php');
+
+                console.log(nomPatient);
     
                 req.send(data);
             }

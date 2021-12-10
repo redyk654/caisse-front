@@ -103,6 +103,7 @@ export default class ImprimerHistorique extends Component {
                 <div style={{fontSize: 9, display: 'flex', justifyContent: 'center', alignItems: 'center', paddingTop: '10px',}}>
                     <div style={{textAlign: 'center', width: '410px'}}>
                         <div style={{marginTop: 5}}>Fiche de recette du <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.infoRecette ? this.mois(this.props.infoRecette[0].date_heure.substring(0, 11)) : (this.mois(new Date().toLocaleDateString()) + ' ')} à {this.props.infoRecette ? this.props.infoRecette[0].date_heure.substring(11,) : (' ' + new Date().getHours() + 'h' + new Date().getMinutes() + 'min')}</span></div>
+                        <div style={{marginTop: 5}}>Service fait par <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.nomConnecte}</span></div>
                         <div style={{textAlign: 'center', marginBottom: 15}}>
                             <table style={table_styles}>
                                 <thead>
