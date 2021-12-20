@@ -55,6 +55,9 @@ export default function GestionFactures(props) {
 
     const componentRef = useRef();
 
+    let date_select1 = useRef();
+    let date_select2 = useRef();
+
     const [factures, setFactures] = useState([]);
     const [factureSauvegarde, setfactureSauvegarde] = useState([]);
     const [montantVerse, setmontantVerse] = useState('');
@@ -70,13 +73,18 @@ export default function GestionFactures(props) {
     const [supp, setSupp] =  useState(true);
     const [modalReussi, setModalReussi] = useState(false);
     const [modalConfirmation, setModalConfirmation] = useState(false);
+    const [dateDepart, setdateDepart] = useState('');
+    const [dateFin, setdateFin] = useState('');
+    const [caissier, setCaissier] = useState('');
+    const [reccetteTotal, setRecetteTotal] = useState(0);
+
 
     useEffect(() => {
         setFactures([])
         setfactureSauvegarde([]);
         const req = new XMLHttpRequest();
         if (filtrer) {
-            req.open('GET', 'http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui');
+            req.open('GET', `http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui&caissier=${props.nomConnecte}`);
             const req2 = new XMLHttpRequest();
             req2.open('GET', 'http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui&manquant');
             req2.addEventListener('load', () => {
@@ -106,6 +114,43 @@ export default function GestionFactures(props) {
 
         req.send();
     }, [filtrer, effet])
+
+    useEffect(() => {
+
+        const d = new Date();
+        let dateD;
+        let dateF;
+
+        if (dateDepart.length === 10) {
+            dateD = dateDepart;
+            dateF = dateFin;
+
+            const data = new FormData();
+            data.append('dateD', dateD);
+            data.append('dateF', dateF);
+            data.append('caissier', caissier);
+    
+            const req = new XMLHttpRequest();
+            if (dateD === dateF) {
+                req.open('POST', `http://serveur/backend-cma/recette_pharmacie.php?moment=jour`);
+            } else {
+                req.open('POST', `http://serveur/backend-cma/recette_pharmacie.php?moment=nuit`);
+            }
+    
+            req.addEventListener('load', () => {
+                const result = JSON.parse(req.responseText);
+                console.log(result);
+                if (isNaN(result[0].recette)) {
+                    setRecetteTotal(0);
+                } else {
+                    setRecetteTotal(result[0].recette);
+                }
+            });
+    
+            req.send(data);
+        }
+
+    }, [dateDepart, dateFin, caissier]);
 
     useEffect(() => {
         if (factureSelectionne.length > 0) {
@@ -244,6 +289,12 @@ export default function GestionFactures(props) {
 
     }
 
+    const rechercherHistorique = () => {
+        setdateDepart(date_select1.current.value);
+        setdateFin(date_select2.current.value);
+        setCaissier(props.nomConnecte);
+    }
+
     const fermerModalReussi = () => {
         setModalReussi(false);
         seteffet(!effet);
@@ -324,6 +375,21 @@ export default function GestionFactures(props) {
                 <p className="search-zone">
                     <input type="text" placeholder="Nom du patient" onChange={filtrerListe} />
                 </p>
+
+                <p>
+                    <label htmlFor="">Du : </label>
+                    <input type="date" ref={date_select1} />
+                </p>
+                <p>
+                    <label htmlFor="">Au : </label>
+                    <input type="date" ref={date_select2} />
+                </p>
+                <p>
+                    <button onClick={rechercherHistorique}>rechercher</button>
+                </p>
+                <p>
+                    recette du jour : <strong>{reccetteTotal + ' Fcfa'}</strong>
+                </p>
                 <p>
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>
                     <input type="checkbox" name="non_regle" id="non_regle" checked={filtrer} onChange={() => setFiltrer(!filtrer)} />
@@ -390,7 +456,7 @@ export default function GestionFactures(props) {
                         <button style={{width: '20%', height: '5vh', marginLeft: '15px', backgroundColor: '#e14046'}} onClick={() => {if(detailsFacture.length > 0 && parseInt(factureSelectionne[0].reste_a_payer) > 0) setModalConfirmation(true)}}>Annuler</button>
                     </div>
                     <h3 style={{marginTop: 5}}>Régler la facture</h3>
-                    {factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer > 0 ? (
+                    {filtrer ? (
                         <div style={{marginTop: 13}}>
                             <p>
                                 <label htmlFor="">Montant versé: </label>

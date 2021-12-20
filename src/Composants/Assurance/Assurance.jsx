@@ -222,7 +222,7 @@ export default function Assurance() {
                     <div style={{display: 'flex', flexDirection: 'column' , width: '100%', marginTop: 10, color: '#f1f1f1'}}>
                         <label htmlFor="" style={{display: 'block',}}>Nom et prénom</label>
                         <div>
-                            <input type="text" name="qteDesire" style={{width: '250px', height: '4vh'}} value={patient} onChange={(e) => setPatient(e.target.value.trim())} autoComplete='off' />
+                            <input type="text" name="qteDesire" style={{width: '250px', height: '4vh'}} value={patient} onChange={(e) => setPatient(e.target.value)} autoComplete='off' />
                             <button style={{cursor: 'pointer', width: '95px', height: '4vh', marginLeft: '5px'}} onClick={ajouterPatient}>Enregistrer</button>
                         </div>
                         <div style={{marginTop: '10px', lineHeight: '25px',}}>
