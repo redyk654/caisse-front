@@ -272,6 +272,8 @@ export default function Apercu(props) {
                     historique={historique}
                     total={reccetteTotal}
                     nomConnecte={props.nomConnecte}
+                    dateDepart={dateDepart}
+                    dateFin={dateFin}
                 />
             </div>
         </section>

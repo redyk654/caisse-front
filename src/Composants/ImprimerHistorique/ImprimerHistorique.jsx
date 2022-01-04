@@ -81,6 +81,36 @@ export default class ImprimerHistorique extends Component {
         }
     }
 
+    mois2 = (str) => {
+
+        switch(parseInt(str.substring(5, 7))) {
+            case 1:
+                return str.substring(8, 10) + " janvier " + str.substring(0, 4);
+            case 2:
+                return str.substring(8, 10) + " fevrier " + str.substring(0, 4);
+            case 3:
+                return str.substring(8, 10) + " mars " + str.substring(0, 4);
+            case 4:
+                return str.substring(8, 10) + " avril " +  str.substring(0, 4);
+            case 5:
+                return str.substring(8, 10) + " mai " + str.substring(0, 4);
+            case 6:
+                return str.substring(8, 10) + " juin " + str.substring(0, 4);
+            case 7:
+                return str.substring(8, 10) + " juillet " + str.substring(0, 4);
+            case 8:
+                return str.substring(8, 10) + " août " + str.substring(0, 4);
+            case 9:
+                return str.substring(8, 10) + " septembre " + str.substring(0, 4);
+            case 10:
+                return str.substring(8, 10) + " octobre " + str.substring(0, 4);
+            case 11:
+                return str.substring(8, 10) + " novembre " + str.substring(0, 4);
+            case 12:
+                return str.substring(8, 10) + " décembre " + str.substring(0, 4);
+        }
+    }
+
     render() {
         return (
             <div style={{backgroundColor: '#f1f1f1', height: '100vh', marginTop: '70px'}}>
@@ -104,6 +134,7 @@ export default class ImprimerHistorique extends Component {
                     <div style={{textAlign: 'center', width: '410px'}}>
                         <div style={{marginTop: 5}}>Fiche de recette du <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.infoRecette ? this.mois(this.props.infoRecette[0].date_heure.substring(0, 11)) : (this.mois(new Date().toLocaleDateString()) + ' ')} à {this.props.infoRecette ? this.props.infoRecette[0].date_heure.substring(11,) : (' ' + new Date().getHours() + 'h' + new Date().getMinutes() + 'min')}</span></div>
                         <div style={{marginTop: 5}}>Service fait par <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.nomConnecte}</span></div>
+                        <div style={{marginTop: 5}}>Du <span style={{fontWeight: '600', marginTop: '15px'}}>{this.mois2(this.props.dateDepart)}</span> Au <strong>{this.mois2(this.props.dateFin)}</strong></div>
                         <div style={{textAlign: 'center', marginBottom: 15}}>
                             <table style={table_styles}>
                                 <thead>
