@@ -12,6 +12,27 @@ const btn_styles = {
     cursor: 'pointer',
 }
 
+const stylePatient = {
+    marginTop: '5px',
+    height: '45vh',
+    border: '1px solid gray',
+    overflow: 'auto',
+    position: 'relative',
+    backgroundColor: '#fff'
+}
+
+const customStyles1 = {
+    content: {
+      top: '15%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+      background: '#0e771a',
+    }, 
+};
+
 const customStyles4 = {
     content: {
       top: '40%',
@@ -35,20 +56,25 @@ export default function Assurance() {
     const [listeClientsSauvegarde, setListeClientsSauvegarde] = useState([]);
     const [listePatient, setlistePatient] = useState([]);
     const [listePatientSauvegarde, setlistePatientSauvegarde] = useState([]);
+    const [listeAssurances, setListeAssurances] = useState([]);
     const [assurance, setAssurance] = useState('assuretous');
     const [assuranceClient, setAssuranceClient] = useState('assuretous');
+    const [nvAssurance, setnvAssurance] = useState('');
     const [typeAssurance, setTypeAssurance] = useState(0);
     const [patient, setPatient] = useState('');
     const [clientSelect, setClientSelect] = useState([]);
     const [infosClient, setInfosClient] = useState([]);
     const [modalPatient, setModalPatient] = useState(false);
+    const [modalConfirmation, setModalConfirmation] = useState(false);
+    const [fecth, setFetch] = useState(false);
+    const [assuranceSelect, setAssuranceSelect] = useState('');
 
     useEffect(() => {
         if(clientSelect.length === 1) {
             let result = [], i = 0;
             clientSelect[0].factures.map(item => {
                 const req = new XMLHttpRequest();
-                req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item}`);
+                req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture=${item}`);
                 req.addEventListener('load', () => {
                     i++;
                     result = [...result, ...JSON.parse(req.responseText)];
@@ -64,7 +90,7 @@ export default function Assurance() {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/gestion_patients.php');
+        req.open('GET', 'http://localhost/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -75,6 +101,18 @@ export default function Assurance() {
         req.send();
     }, [modalPatient]);
 
+    useEffect(() => {
+        const req = new XMLHttpRequest();
+        req.open('GET', 'http://localhost/backend-cma/assurances.php?liste');
+
+        req.addEventListener('load', () => {
+            const result = JSON.parse(req.responseText);
+            setListeAssurances(result);
+        })
+
+        req.send();
+    }, [modalPatient, fecth]);
+
     const rechercherClient = () => {
         const data = new FormData();
         data.append('date_min', date_select1.current.value);
@@ -82,13 +120,13 @@ export default function Assurance() {
         data.append('assurance', assurance);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=service');
+        req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=service');
 
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
             const req2 = new XMLHttpRequest();
-            req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
+            req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
                 traiterData(result);
@@ -140,7 +178,7 @@ export default function Assurance() {
             data.append('categorie', 'service');
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -152,7 +190,7 @@ export default function Assurance() {
                         data.append('categorie', 'pharmacie');
 
                         const req2 = new XMLHttpRequest();
-                        req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+                        req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
                         req2.addEventListener('load', () => {
                             i++;
@@ -183,7 +221,7 @@ export default function Assurance() {
             data.append('id_general', id);
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -204,11 +242,26 @@ export default function Assurance() {
         data.append('type_assurance', typeAssurance);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_patients.php');
+        req.open('POST', 'http://localhost/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             setModalPatient(false);
             setPatient('');
+        });
+
+        req.send(data);
+    }
+
+    const ajouterAssurance = () => {
+        const data = new FormData();
+        data.append('designation', nvAssurance);
+        
+        const req = new XMLHttpRequest();
+        req.open('POST', 'http://localhost/backend-cma/assurances.php');
+
+        req.addEventListener('load', () => {
+            setFetch(!fecth);
+            setnvAssurance('');
         });
 
         req.send(data);
@@ -229,8 +282,9 @@ export default function Assurance() {
                             <p>
                                 <label htmlFor="">Assurance : </label>
                                 <select name="assurance" id="" onChange={(e) => setAssuranceClient(e.target.value)}>
-                                    <option value="assuretous">AssureTous</option>
-                                    <option value="ascoma">ASCOMA</option>
+                                    {listeAssurances.map(item => (
+                                        <option value={item.designation}>{item.designation}</option>
+                                    ))}
                                 </select>
                             </p>
                             <p>
@@ -245,8 +299,39 @@ export default function Assurance() {
                         </div>
                     </div>
                 </div>
+                <div style={{border: '1px solid #fff', marginTop: '30px'}}>
+                    <h2 style={{color: '#fff', marginBottom: '15px'}}>Nouvelle assurance</h2>
+                    <label htmlFor="" style={{display: 'block', color: '#f1f1f1'}}>Désignation</label>
+                    <div>
+                        <input type="text" name="nvAssurance" style={{width: '250px', height: '4vh'}} value={nvAssurance} onChange={(e) => setnvAssurance(e.target.value)} autoComplete='off' />
+                        <button style={{cursor: 'pointer', width: '95px', height: '4vh', marginLeft: '5px'}} onClick={ajouterAssurance}>Ajouter</button>
+                    </div>
+                    <div style={{marginTop: '10px'}}>
+                        <h3 style={{color: '#fff'}}>Liste des assurances</h3>
+                        <ul style={stylePatient}>
+                            {listeAssurances.length > 0 && listeAssurances.map(item => (
+                                <li value={item.id} style={{padding: '6px'}} onClick={() => {setModalConfirmation(true); setAssuranceSelect(item.designation)}}>{item.designation}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
             </Fragment>
         )
+    }
+
+    const supprimerAssurance = () => {
+        const data = new FormData();
+        data.append('supprime', assuranceSelect);
+        
+        const req = new XMLHttpRequest();
+        req.open('POST', 'http://localhost/backend-cma/assurances.php');
+
+        req.addEventListener('load', () => {
+            setFetch(!fecth);
+            fermerModalConfirmation();
+        });
+
+        req.send(data);
     }
 
     const sauvegarderFacture = () => {
@@ -263,7 +348,7 @@ export default function Assurance() {
             data.append('reste', parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100));
     
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
     
             req.addEventListener('load', () => {
                 enregistrerIdFactures(id);
@@ -330,6 +415,10 @@ export default function Assurance() {
         setModalPatient(false);
     }
 
+    const fermerModalConfirmation = () => {
+        setModalConfirmation(false);
+    }
+
     return (
         <section className="commande">
             <Modal
@@ -339,6 +428,17 @@ export default function Assurance() {
                 contentLabel="Ajouter patient"
             >
                 {contenuModal()}
+            </Modal>
+            <Modal
+                isOpen={modalConfirmation}
+                style={customStyles1}
+                contentLabel="validation commande"
+            >
+                <h2 style={{color: '#fff'}}>Vous allez supprimer {assuranceSelect} des assurances. voulez-vous continuer ?</h2>
+                <div style={{textAlign: 'center'}} className='modal-button'>
+                    <button  style={{width: '20%', height: '5vh', cursor: 'pointer', marginRight: '10px'}} onClick={fermerModalConfirmation}>NON</button>
+                    <button className="valider" style={{width: '20%', height: '5vh', cursor: 'pointer'}} onClick={supprimerAssurance}>OUI</button>
+                </div>
             </Modal>
             <div className="left-side">
                 <div><button style={btn_styles} onClick={() => setModalPatient(true)}>Ajouter</button></div>
@@ -354,8 +454,9 @@ export default function Assurance() {
                     <p>
                         <label htmlFor="">Assurance : </label>
                         <select name="assurance" onChange={(e) => setAssurance(e.target.value)}>
-                            <option value="assuretous">AssureTous</option>
-                            <option value="ascoma">Ascoma</option>
+                            {listeAssurances.map(item => (
+                                <option value={item.designation}>{item.designation}</option>
+                            ))}
                         </select>
                     </p>
                     <button style={btn_styles} onClick={rechercherClient}>rechercher</button>

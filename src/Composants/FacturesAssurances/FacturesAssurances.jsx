@@ -25,7 +25,7 @@ export default function FacturesAssurances() {
     useEffect(() => {
         if(clientSelect.length === 1) {
             const req = new XMLHttpRequest();
-            req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?id_general=${clientSelect[0].id_facture}`);
+            req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?id_general=${clientSelect[0].id_facture}`);
             req.addEventListener('load', () => {
 
                 const result = JSON.parse(req.responseText);
@@ -34,7 +34,7 @@ export default function FacturesAssurances() {
                 let i = 0;
                 result.forEach(item => {
                     const req2 = new XMLHttpRequest();
-                    req2.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item.id_facture}`);
+                    req2.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture=${item.id_facture}`);
             
                     req2.addEventListener('load', () => {
                         i++;
@@ -56,7 +56,7 @@ export default function FacturesAssurances() {
     useEffect(() => {
         // Récupération des clients
         const req = new XMLHttpRequest();
-        req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture_fait=oui`);
+        req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture_fait=oui`);
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -74,13 +74,13 @@ export default function FacturesAssurances() {
         data.append('statu', 'done');
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=service');
+        req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=service');
 
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
             const req2 = new XMLHttpRequest();
-            req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
+            req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
                 traiterData(result);

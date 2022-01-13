@@ -29,7 +29,7 @@ export default function Connexion(props) {
         data.append('mdp', mdp);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/connexion_caisse.php');
+        req.open('POST', 'http://localhost/backend-cma/connexion_caisse.php');
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {
