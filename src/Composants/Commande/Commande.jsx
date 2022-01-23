@@ -101,6 +101,7 @@ export default function Commande(props) {
     const [medocSelect, setMedoSelect] = useState(false);
     const [medocCommandes, setMedocCommandes] = useState([]);
     const [frais, setFrais] = useState(false);
+    const [montantFrais, setMontantFrais] = useState(0);
     const [qtePrixTotal, setQtePrixTotal] = useState({});
     const [option, setoption] = useState('');
     const [reduction, setreduction] = useState(false);
@@ -147,12 +148,12 @@ export default function Commande(props) {
             // Récupération des médicaments dans la base via une requête Ajax
             const req = new XMLHttpRequest();
             if (urgence) {
-                req.open('GET', 'http://localhost/backend-cma/recuperer_services.php?urgence=oui');
+                req.open('GET', 'http://serveur/backend-cma/recuperer_services.php?urgence=oui');
             } else {
-                req.open('GET', 'http://localhost/backend-cma/recuperer_services.php');
+                req.open('GET', 'http://serveur/backend-cma/recuperer_services.php');
             }
             req.addEventListener("load", () => {
-                if (req.status >= 200 && req.status < 400) { // Le localhost a réussi à traiter la requête
+                if (req.status >= 200 && req.status < 400) { // Le serveur a réussi à traiter la requête
                     const result = JSON.parse(req.responseText);
     
                     // Mise à jour de la liste de médicament et sauvegarde de la même liste pour la gestion du filtrage de médicament
@@ -167,9 +168,9 @@ export default function Commande(props) {
                 }
             });
             req.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le localhost
-                console.error("Erreur réseau");
-            });
+                // La requête n'a pas réussi à atteindre le serveur
+                setMessageErreur('Erreur réseau');
+            });    
     
             req.send();
         }
@@ -192,6 +193,7 @@ export default function Commande(props) {
 
             if (frais) {
                 prixTotal += 500;
+                setMontantFrais(500);
             }
             
             // prixTotal += medocSelect[0].prix_total;
@@ -315,7 +317,19 @@ export default function Commande(props) {
 
     const sauvegarder = () => {
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/backup.php');
+        req.open('POST', 'http://serveur/backend-cma/backup.php');
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('');
+        });
+
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
         req.send();
     }
 
@@ -347,18 +361,25 @@ export default function Commande(props) {
         data.append('statu', statu);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/gestion_factures.php');
+        req.open('POST', 'http://serveur/backend-cma/gestion_factures.php');
 
         req.addEventListener('load', () => {
             setMedoSelect(false);
             setMessageErreur('');
             setFrais(false);
+            setMontantFrais(0);
             setActualiserQte(!actualiserQte);
             // Activation de la fenêtre modale qui indique la réussite de la commmande
             setModalReussi(true);
             // Désactivation de la fenêtre modale de confirmation
             fermerModalConfirmation();
         });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
 
         req.send(data);
 
@@ -376,9 +397,7 @@ export default function Commande(props) {
                 data.append('type_assurance', 0);        
                 
                 const req = new XMLHttpRequest();
-                req.open('POST', 'http://localhost/backend-cma/gestion_patients.php');
-
-                console.log(nomPatient);
+                req.open('POST', 'http://serveur/backend-cma/gestion_patients.php');
     
                 req.send(data);
             }
@@ -390,7 +409,19 @@ export default function Commande(props) {
         data.append('quantite', qteDesire);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/data_assurance.php');
+        req.open('POST', 'http://serveur/backend-cma/data_assurance.php');
+
+        req.addEventListener("load", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('');
+        });
+
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
 
         req.send(data);
     }
@@ -398,7 +429,7 @@ export default function Commande(props) {
     const validerCommande = () => {
 
         /* 
-            Organisation des données qui seront envoyés au localhost :
+            Organisation des données qui seront envoyés au serveur :
                 - pour la mise à jour des stocks de médicaments
                 - pour la mise à jour de l'historique des commandes
         */
@@ -412,6 +443,14 @@ export default function Commande(props) {
             medocCommandes.map(item => {
 
                 const data2 = new FormData();
+                if (i === 0) {
+                    if (montantFrais > 0) {
+                        data2.append('frais', 500);
+                    }
+                } else {
+                    data2.append('frais', 0);
+                }
+
                 nomPatient && data2.append('patient', nomPatient);
                 data2.append('id_facture', id);
                 data2.append('designation', item.designation);
@@ -423,11 +462,12 @@ export default function Commande(props) {
 
                 // Envoi des données
                 const req2 = new XMLHttpRequest();
-                req2.open('POST', 'http://localhost/backend-cma/maj_historique_service.php');
+                req2.open('POST', 'http://serveur/backend-cma/maj_historique_service.php');
                 
                 // Une fois la requête charger on vide tout les états
                 req2.addEventListener('load', () => {
                     if (req2.status >= 200 && req2.status < 400) {
+                        setMessageErreur('');
                         i++;
                         if (medocCommandes.length === i) {
                             // Toutes les données ont été envoyées
@@ -436,6 +476,12 @@ export default function Commande(props) {
                         }
                     }
                 });
+
+                req2.addEventListener("error", function () {
+                    // La requête n'a pas réussi à atteindre le serveur
+                    setMessageErreur('Erreur réseau');
+                });
+        
                 req2.send(data2);
             })
         }
@@ -512,13 +558,19 @@ export default function Commande(props) {
         setModalPatient(true);
 
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/gestion_patients.php');
+        req.open('GET', 'http://serveur/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
             setlistePatient(result);
             setlistePatientSauvegarde(result);
-        })
+        });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
 
         req.send();
     }
@@ -540,7 +592,7 @@ export default function Commande(props) {
         data.append('categorie', document.getElementById('categorie').value);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/nouveau_service.php');
+        req.open('POST', 'http://serveur/backend-cma/nouveau_service.php');
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {

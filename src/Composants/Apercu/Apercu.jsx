@@ -20,6 +20,7 @@ export default function Apercu(props) {
     const [listeComptes, setListeComptes] = useState([]);
     const [dateJour, setdateJour] = useState('');
     const [reccetteTotal, setRecetteTotal] = useState(false);
+    const [montantFrais, setMontantFrais] = useState(0);
     const [dateDepart, setdateDepart] = useState('');
     const [dateFin, setdateFin] = useState('');
     const [caissier, setCaissier] = useState('');
@@ -31,6 +32,8 @@ export default function Apercu(props) {
     const [chr, setChr] = useState(0);
     const [med, setMed] = useState(0);
     const [upec, setUpec] = useState(0);
+    const [messageErreur, setMessageErreur] = useState('');
+
 
     useEffect(() => {
         startChargement();
@@ -54,13 +57,19 @@ export default function Apercu(props) {
         data.append('caissier', caissier);
 
         const req = new XMLHttpRequest();
+        // Récupération des frais matériel
+        const req2 = new XMLHttpRequest();
+
         if (dateD === dateF) {
             req.open('POST', `http://serveur/backend-cma/apercu.php?moment=jour`);
+            req2.open('POST', `http://serveur/backend-cma/frais.php?moment=jour`);
         } else {
             req.open('POST', `http://serveur/backend-cma/apercu.php?moment=nuit`);
+            req2.open('POST', `http://serveur/backend-cma/frais.php?moment=nuit`);
         }
 
         req.addEventListener('load', () => {
+            setMessageErreur('');
             const result = JSON.parse(req.responseText);
             resetCategorie();
             sethistorique(result);
@@ -76,6 +85,30 @@ export default function Apercu(props) {
             }
         });
 
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
+        req2.addEventListener('load', () => {
+            if(req2.status >= 200 && req2.status < 400) {
+                setMessageErreur('');
+                let result2 = JSON.parse(req2.responseText);
+
+                let t = 0;
+                result2.map(item2 => {
+                    t += parseInt(item2.frais);
+                })
+                setMontantFrais(t);
+            }
+        });
+
+        req2.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
+        req2.send(data);
         req.send(data);
 
     }, [dateDepart, dateFin, caissier]);
@@ -94,10 +127,16 @@ export default function Apercu(props) {
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
+                setMessageErreur('');
                 let result = JSON.parse(req.responseText);
                 result = result.filter(item => (item.rol === "caissier"))
                 setListeComptes(result);
             }
+        });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
         });
 
         req.send();
@@ -116,7 +155,7 @@ export default function Apercu(props) {
 
     const calculerRecetteParCategorie = (acte) => {
         const codes = ['RX', 'LAB', 'MA', 'MED', 'CHR', 'CO', 'UPEC', 'ECHO'];
-        let lab = 0, rx = 0, ma = 0, me = 0, ch = 0, co = 0, up = 0, ec = 0
+        let lab = 0, rx = 0, ma = 0, me = 0, ch = 0, co = 0, up = 0, ec = 0;
 
         acte.map(item => {
             if (item.designation.toUpperCase().indexOf(codes[0]) === 0) {
@@ -206,6 +245,7 @@ export default function Apercu(props) {
             <div className="container-historique">
                 <div className="table-commandes">
                     <div className="entete-historique">
+                        <div className='erreur-message'>{messageErreur}</div>
                         <div>
                             <p>
                                 <label htmlFor="">Du : </label>
@@ -227,7 +267,9 @@ export default function Apercu(props) {
                             </p>
                         </div>
                         <button onClick={rechercherHistorique}>rechercher</button>
-                        <div>Recette total : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Recette : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Frais matériel : <span style={{fontWeight: '700'}}>{reccetteTotal ? montantFrais + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Total : <span style={{fontWeight: '700'}}>{reccetteTotal ? (reccetteTotal + montantFrais) + ' Fcfa' : '0 Fcfa'}</span></div>
                         <div style={{display: 'none',}}>
                             <div style={{width: '50%'}}>Laboratoire : <span style={{fontWeight: '700'}}>{reccetteTotal ? labo + ' Fcfa' : '0 Fcfa'}</span></div>
                             <div style={{width: '50%'}}>Radiologie : <span style={{fontWeight: '700'}}>{reccetteTotal ? radio + ' Fcfa' : '0 Fcfa'}</span></div>
@@ -270,7 +312,8 @@ export default function Apercu(props) {
                 <ImprimerHistorique
                     ref={componentRef}
                     historique={historique}
-                    total={reccetteTotal}
+                    recetteTotal={reccetteTotal}
+                    montantFrais={montantFrais}
                     nomConnecte={props.nomConnecte}
                     dateDepart={dateDepart}
                     dateFin={dateFin}

@@ -29,7 +29,7 @@ export default function Connexion(props) {
         data.append('mdp', mdp);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/connexion_caisse.php');
+        req.open('POST', 'http://serveur/backend-cma/connexion_caisse.php');
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {
@@ -45,6 +45,11 @@ export default function Connexion(props) {
             } else {
                 console.log(req.status + " " + req.statusText);
             }
+        });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setErreur('Erreur réseau');
         });
 
         req.send(data);

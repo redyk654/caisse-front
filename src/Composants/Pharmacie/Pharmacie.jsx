@@ -77,7 +77,7 @@ export default function GestionFactures(props) {
     const [dateFin, setdateFin] = useState('');
     const [caissier, setCaissier] = useState('');
     const [reccetteTotal, setRecetteTotal] = useState(0);
-
+    const [messageErreur, setMessageErreur] = useState('');
 
     useEffect(() => {
         setFactures([])
@@ -88,9 +88,16 @@ export default function GestionFactures(props) {
             const req2 = new XMLHttpRequest();
             req2.open('GET', 'http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui&manquant');
             req2.addEventListener('load', () => {
+                setMessageErreur('');
                 const result = JSON.parse(req2.responseText);
                 setManquantTotal(result[0].manquant);
             })
+
+            req2.addEventListener("error", function () {
+                // La requête n'a pas réussi à atteindre le serveur
+                setMessageErreur('Erreur réseau');
+            });
+
             req2.send();
 
         } else {
@@ -98,6 +105,7 @@ export default function GestionFactures(props) {
         }
         req.addEventListener("load", () => {
             if (req.status >= 200 && req.status < 400) { // Le serveur a réussi à traiter la requête
+                setMessageErreur('');
                 const result = JSON.parse(req.responseText);
                 setFactures(result);
                 setfactureSauvegarde(result);
@@ -109,7 +117,7 @@ export default function GestionFactures(props) {
         });
         req.addEventListener("error", function () {
             // La requête n'a pas réussi à atteindre le serveur
-            console.error("Erreur réseau");
+            setMessageErreur('Erreur réseau');
         });
 
         req.send();
@@ -138,6 +146,7 @@ export default function GestionFactures(props) {
             }
     
             req.addEventListener('load', () => {
+                setMessageErreur('');
                 const result = JSON.parse(req.responseText);
                 console.log(result);
                 if (isNaN(result[0].recette)) {
@@ -146,6 +155,12 @@ export default function GestionFactures(props) {
                     setRecetteTotal(result[0].recette);
                 }
             });
+
+            req.addEventListener("error", function () {
+                // La requête n'a pas réussi à atteindre le serveur
+                setMessageErreur('Erreur réseau');
+            });
+    
     
             req.send(data);
         }
@@ -159,9 +174,16 @@ export default function GestionFactures(props) {
             req.open('GET', `http://serveur/backend-cma/factures_pharmacie.php?id=${factureSelectionne[0].id}`);
     
             req.addEventListener('load', () => {
+                setMessageErreur('');
                 const result = JSON.parse(req.responseText);
                 setdetailsFacture(result);
             });
+
+            req.addEventListener("error", function () {
+                // La requête n'a pas réussi à atteindre le serveur
+                setMessageErreur('Erreur réseau');
+            });
+    
 
             req.send();
         }
@@ -234,6 +256,7 @@ export default function GestionFactures(props) {
             req.addEventListener('load', () => {
                 // Mise à jour des stocks des médicaments vendus
                 let i = 0;
+                setMessageErreur('');
                 detailsFacture.map(item => {
                     const data1 = new FormData();
                     data1.append('produit', JSON.stringify(item));
@@ -243,7 +266,7 @@ export default function GestionFactures(props) {
 
                     req1.addEventListener("load", function () {
                         if (req1.status >= 200 && req1.status < 400) {
-                            console.log(req1.responseText);
+                            setMessageErreur('');
                             i++;
                             if (i === detailsFacture.length) {
                                 setSupp(false);
@@ -253,9 +276,21 @@ export default function GestionFactures(props) {
                         }
                     });
 
+                    req1.addEventListener("error", function () {
+                        // La requête n'a pas réussi à atteindre le serveur
+                        setMessageErreur('Erreur réseau');
+                    });
+            
+
                     req1.send(data1);
                 });
             });
+
+            req.addEventListener("error", function () {
+                // La requête n'a pas réussi à atteindre le serveur
+                setMessageErreur('Erreur réseau');
+            });
+    
 
             req.send(data);
         }
@@ -408,6 +443,7 @@ export default function GestionFactures(props) {
             </div>
             <div className="details">
                 <h3>Détails facture</h3>
+                <div className='erreur-message'>{messageErreur}</div>
                 <div style={{textAlign: 'center', paddingTop: 10}}>
                     <div>
                         <div>Facture N°<span style={{color: '#0e771a', fontWeight: 700}}>{factureSelectionne.length > 0 && factureSelectionne[0].id}</span></div>

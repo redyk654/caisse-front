@@ -18,8 +18,8 @@ function createWindow () {
       isDev ? 'http:localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`
     )
 
-    // win.setMenuBarVisibility(false)
-    // win.removeMenu()
+    win.setMenuBarVisibility(false)
+    win.removeMenu()
 }
 
 app.whenReady().then(() => {

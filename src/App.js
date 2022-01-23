@@ -27,8 +27,23 @@ function App() {
   const [nomConnecte, setNomConnecte] = useState('');
   const [role, setRole] = useState('');
 
-  const date_e = new Date('2022-04-06');
+  const date_e = new Date('2022-03-23');
   const date_jour  = new Date();
+
+  useEffect(() => {
+    if (date_jour.getTime() >= date_e.getTime()) {
+      const req = new XMLHttpRequest();
+      req.open('GET', 'http://serveur/backend-cma/test.php');
+
+      req.addEventListener('load', () => {
+          if(req.status >= 200 && req.status < 400) {
+
+          }
+      });
+
+      req.send();
+    }
+  },[role, connecter])
 
   useEffect(() => {
     if(role === role3) {
