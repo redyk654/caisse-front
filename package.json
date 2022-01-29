@@ -17,6 +17,7 @@
     "electron-is-dev": "^2.0.0",
     "express": "^4.17.1",
     "react": "^17.0.2",
+    "react-data-export": "^0.6.0",
     "react-dom": "^17.0.2",
     "react-loader-spinner": "^4.0.0",
     "react-modal": "^3.14.3",
@@ -25,7 +26,8 @@
     "react-typewriter": "^0.4.1",
     "socket.io": "^4.2.0",
     "typewriter-effect": "^2.17.0",
-    "web-vitals": "^1.1.1"
+    "web-vitals": "^1.1.1",
+    "xlsx": "^0.17.5"
   },
   "scripts": {
     "react-start": "react-scripts start",

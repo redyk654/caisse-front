@@ -57,21 +57,17 @@ export default function Apercu(props) {
         data.append('caissier', caissier);
 
         const req = new XMLHttpRequest();
-        // Récupération des frais matériel
-        const req2 = new XMLHttpRequest();
 
         if (dateD === dateF) {
             req.open('POST', `http://serveur/backend-cma/apercu.php?moment=jour`);
-            req2.open('POST', `http://serveur/backend-cma/frais.php?moment=jour`);
         } else {
             req.open('POST', `http://serveur/backend-cma/apercu.php?moment=nuit`);
-            req2.open('POST', `http://serveur/backend-cma/frais.php?moment=nuit`);
         }
 
         req.addEventListener('load', () => {
             setMessageErreur('');
+            recuperationFrais();
             const result = JSON.parse(req.responseText);
-            resetCategorie();
             sethistorique(result);
             stopChargement();
             let recette = 0;
@@ -90,25 +86,6 @@ export default function Apercu(props) {
             setMessageErreur('Erreur réseau');
         });
 
-        req2.addEventListener('load', () => {
-            if(req2.status >= 200 && req2.status < 400) {
-                setMessageErreur('');
-                let result2 = JSON.parse(req2.responseText);
-
-                let t = 0;
-                result2.map(item2 => {
-                    t += parseInt(item2.frais);
-                })
-                setMontantFrais(t);
-            }
-        });
-
-        req2.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
-            setMessageErreur('Erreur réseau');
-        });
-
-        req2.send(data);
         req.send(data);
 
     }, [dateDepart, dateFin, caissier]);
@@ -141,6 +118,52 @@ export default function Apercu(props) {
 
         req.send();
     }, []);
+
+    const recuperationFrais = () => {
+
+        const d = new Date();
+        let dateD;
+        let dateF;
+
+        if (dateDepart.length === 10) {
+            dateD = dateDepart;
+            dateF = dateFin;
+        } else {
+            dateD = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+            dateF = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+            setdateJour(d.toLocaleString().substr(0, 10));
+        }
+
+        const data = new FormData();
+        data.append('dateD', dateD);
+        data.append('dateF', dateF);
+        data.append('caissier', caissier);
+
+        const req = new XMLHttpRequest();
+        // Récupération des frais matériel
+
+        if (dateD === dateF) {
+            req.open('POST', `http://serveur/backend-cma/frais.php?moment=jour`);
+        } else {
+            req.open('POST', `http://serveur/backend-cma/frais.php?moment=nuit`);
+        }
+
+        req.addEventListener('load', () => {
+            if(req.status >= 200 && req.status < 400) {
+                setMessageErreur('');
+                let result2 = JSON.parse(req.responseText);
+                setMontantFrais(parseInt(result2[0].frais));
+            }
+        });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le serveur
+            setMessageErreur('Erreur réseau');
+        });
+
+        req.send(data);
+
+    }
 
     const resetCategorie = () => {
         setLabo(0);

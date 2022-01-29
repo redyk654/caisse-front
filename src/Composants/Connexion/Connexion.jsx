@@ -36,7 +36,7 @@ export default function Connexion(props) {
                 if (req.responseText == "identifiant ou mot de passe incorrect") {
                     setErreur(req.responseText);
                 } else {
-                    setErreur('')
+                    setErreur('');
                     const result = JSON.parse(req.responseText);
                     props.setRole(result.rol);
                     props.setNomConnecte(result.nom_user);

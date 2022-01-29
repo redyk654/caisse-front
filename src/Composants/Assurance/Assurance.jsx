@@ -1,6 +1,11 @@
 import React, { useEffect, useState, useRef, Fragment } from 'react';
 import '../Commande/Commande.css';
 import Modal from 'react-modal';
+import ReactExport from "react-data-export";
+
+const ExcelFile = ReactExport.ExcelFile;
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 const btn_styles = {
     backgroundColor: '#6d6f94', 
@@ -47,6 +52,7 @@ const customStyles4 = {
     }, 
 };
 
+
 export default function Assurance() {
 
     let date_select1 = useRef();
@@ -64,22 +70,47 @@ export default function Assurance() {
     const [patient, setPatient] = useState('');
     const [clientSelect, setClientSelect] = useState([]);
     const [infosClient, setInfosClient] = useState([]);
+    const [pharmacie, setPharmacie] = useState([]);
+    const [dateInf, setDateInf] = useState('');
+    const [dateSup, setDateSup] = useState('');
+    const [service, setService] = useState([]);
+    const [frais, setFrais] = useState([]);
+    const [reste, setReste] = useState(0);
+    const [montants, setMontants] = useState([]);
     const [modalPatient, setModalPatient] = useState(false);
     const [modalConfirmation, setModalConfirmation] = useState(false);
     const [fecth, setFetch] = useState(false);
     const [assuranceSelect, setAssuranceSelect] = useState('');
+    const [reload, setReload] = useState(false);
 
     useEffect(() => {
         if(clientSelect.length === 1) {
             let result = [], i = 0;
+
             clientSelect[0].factures.map(item => {
                 const req = new XMLHttpRequest();
                 req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item}`);
                 req.addEventListener('load', () => {
                     i++;
                     result = [...result, ...JSON.parse(req.responseText)];
+
                     if (clientSelect[0].factures.length === i) {
+                        result = traiterDoublons(result);
+                        result.map(item => {
+                            if (item.categorie !== "pharmacie") {
+                                let des = extraireCode(item.designation);
+
+                                Object.defineProperty(item, 'designation', {
+                                    value: des,
+                                    configurable: true,
+                                    enumerable: true,
+                                });
+                            }
+                        });
+
                         setInfosClient(result);
+                        setReste((parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)));
+                        setMontants([{reste: reste, total: clientSelect[0].total}]);
                     }
                 });
 
@@ -87,6 +118,10 @@ export default function Assurance() {
             })
         }
     }, [clientSelect]);
+
+    useEffect(() => {
+        separerCategorie(infosClient);
+    }, [infosClient]);
 
     useEffect(() => {
         const req = new XMLHttpRequest();
@@ -113,7 +148,90 @@ export default function Assurance() {
         req.send();
     }, [modalPatient, fecth]);
 
+    const separerCategorie = (result) => {
+        const s = [], p = [];
+
+        result.forEach(item => {
+            if (item.categorie === "pharmacie") {
+                p.push(item);
+            } else {
+                s.push(item)
+            }
+        })
+
+        setPharmacie(p);
+        setService(s);
+        console.log(s,p);
+    }
+
+    const traiterDoublons = (result) => {
+        const des = [];
+        const tab = [];
+        result.forEach(item => {
+            if (des.indexOf(item.designation) === -1) {
+                des.push(item.designation);
+                Object.defineProperty(item, 'prix', {
+                    value: parseInt(item.prix) / parseInt(item.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+                tab.push(item);
+            } else {
+                tab.forEach(item2 => {
+                    if (item.designation === item2.designation) {
+                        if (item2.categorie === "pharmacie") {
+                            Object.defineProperty(item, 'prix', {
+                                value: parseInt(item.prix) / parseInt(item.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                            Object.defineProperty(item2, 'qte', {
+                                value: parseInt(item.qte) + parseInt(item2.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+
+                        } else {
+
+                            Object.defineProperty(item2, 'qte', {
+                                value: parseInt(item.qte) + parseInt(item2.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                            Object.defineProperty(item2, 'prix_total', {
+                                value: parseInt(item.qte) * parseInt(item2.prix),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        tab.forEach(item3 => {
+            if (item3.categorie === "pharmacie") {
+                Object.defineProperty(item3, 'prix_total', {
+                    value: parseInt(item3.prix) * parseInt(item3.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+            } else {
+                Object.defineProperty(item3, 'prix_total', {
+                    value: parseInt(item3.prix) * parseInt(item3.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+            }
+        });
+
+        return tab;
+    }
+
     const rechercherClient = () => {
+        setClientSelect([]);
+        setInfosClient([]);
+        setListeClients([]);
         const data = new FormData();
         data.append('date_min', date_select1.current.value);
         data.append('date_max', date_select2.current.value);
@@ -125,11 +243,18 @@ export default function Assurance() {
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
+            let f = 0;
+            result.forEach(item => {
+                f += parseInt(item.frais);
+            });
+            setFrais(f);
+
             const req2 = new XMLHttpRequest();
             req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
                 traiterData(result);
+                traiterDateConsommation(result);
             });
 
             req2.send(data);
@@ -138,13 +263,57 @@ export default function Assurance() {
         req.send(data)
     }
 
+    const traiterDateConsommation = (result) => {
+        const tab_date = [];
+        result.forEach(item => {
+            tab_date.push(item.date_heure);
+        });
+
+        const maxi = maximumDate(tab_date);
+        const mini = minimumDate(tab_date);
+
+        setDateInf(mini);
+        setDateSup(maxi);
+    }
+
+    const maximumDate = (result) => {
+        let max = result[0];
+
+        result.forEach(item => {
+            const d1 = new Date(item);
+            const d2 = new Date(max);
+
+            if (d1.getTime() > d2.getTime()) {
+                max = item;
+            }
+        });
+
+        return max;
+    }
+
+    const minimumDate = (result) => {
+        let min = result[0];
+
+        result.forEach(item => {
+            const d1 = new Date(item);
+            const d2 = new Date(min);
+
+            if (d1.getTime() < d2.getTime()) {
+                min = item;
+            }
+        });
+
+        return min;
+    }
+
+
     const traiterData = (result) => {
         const clients = [];
         const listeProvisoiresClient = []
         result.forEach(item => {
             if (clients.indexOf(item.patient) === -1) {
                 clients.push(item.patient);
-                listeProvisoiresClient.push({id_fac: item.id_fac, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), type_assurance: item.type_assurance})
+                listeProvisoiresClient.push({id_fac: item.id_fac, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), type_assurance: item.type_assurance, assurance: item.assurance})
             } else {
                 listeProvisoiresClient.forEach(item2 => {
                     if (item.patient === item2.nom){
@@ -159,8 +328,9 @@ export default function Assurance() {
         setListeClientsSauvegarde(listeProvisoiresClient);
     }
 
-    const afficherInfos = (e, nom, factures, total, type_assurance) => {
-        setClientSelect([{nom: nom, factures: factures, total: total, type_assurance: type_assurance}]);
+    const afficherInfos = (e, nom, factures, total, type_assurance, assurance) => {
+        setInfosClient([]);
+        setClientSelect([{nom: nom, factures: factures, total: total, type_assurance: type_assurance, assurance: assurance}]);
     }
 
     const idUnique = () => {
@@ -343,7 +513,7 @@ export default function Assurance() {
             data.append('nom', clientSelect[0].nom);
             data.append('assurance', assurance);
             data.append('assurance_type', clientSelect[0].type_assurance);
-            data.append('periode', "du " + date_select1.current.value + " au " + date_select2.current.value);
+            data.append('periode', "du " + dateInf + " au " + dateSup);
             data.append('total', clientSelect[0].total);
             data.append('reste', parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100));
     
@@ -411,6 +581,36 @@ export default function Assurance() {
         }
     }
 
+    const mois2 = (str) => {
+
+        switch(parseInt(str.substring(5, 7))) {
+            case 1:
+                return str.substring(8, 10) + " janvier " + str.substring(0, 4);
+            case 2:
+                return str.substring(8, 10) + " fevrier " + str.substring(0, 4);
+            case 3:
+                return str.substring(8, 10) + " mars " + str.substring(0, 4);
+            case 4:
+                return str.substring(8, 10) + " avril " +  str.substring(0, 4);
+            case 5:
+                return str.substring(8, 10) + " mai " + str.substring(0, 4);
+            case 6:
+                return str.substring(8, 10) + " juin " + str.substring(0, 4);
+            case 7:
+                return str.substring(8, 10) + " juillet " + str.substring(0, 4);
+            case 8:
+                return str.substring(8, 10) + " août " + str.substring(0, 4);
+            case 9:
+                return str.substring(8, 10) + " septembre " + str.substring(0, 4);
+            case 10:
+                return str.substring(8, 10) + " octobre " + str.substring(0, 4);
+            case 11:
+                return str.substring(8, 10) + " novembre " + str.substring(0, 4);
+            case 12:
+                return str.substring(8, 10) + " décembre " + str.substring(0, 4);
+        }
+    }
+
     const fermerModalPatient = () => {
         setModalPatient(false);
     }
@@ -468,7 +668,7 @@ export default function Assurance() {
                     <h1>Listes des clients</h1>
                     <ul>
                         {listeClients.length > 0 && listeClients.map(item => (
-                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.factures, item.total, item.type_assurance)}>{item.nom}</li>
+                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.factures, item.total, item.type_assurance, item.assurance)}>{item.nom}</li>
                         ))}
                     </ul>
                 </div>
@@ -477,9 +677,11 @@ export default function Assurance() {
                 <h1>Facture générale</h1>
                 {clientSelect.length === 1 && (
                     <div style={{textAlign: 'center', lineHeight: '28px'}}>
-                        <div>Nom : <span style={{fontWeight: '600'}}>{clientSelect[0].nom}</span></div>
-                        <div>Couvert par : <span style={{fontWeight: '600'}}>{assurance}</span></div>
-                        <div>Periode du <span style={{fontWeight: '600'}}>{formaterDate(date_select1.current.value)}</span> au <span style={{fontWeight: '600'}}>{formaterDate(date_select2.current.value)}</span></div>
+                        <div>Nom et prénom : <span style={{fontWeight: '600'}}>{clientSelect[0].nom}</span></div>
+                        <div>Couvert par : <span style={{fontWeight: '600'}}>{clientSelect[0].assurance}</span></div>
+                        <div>Pourcentage : <span style={{fontWeight: '600'}}>{clientSelect[0].type_assurance}</span></div>
+                        <div>Periode : <span style={{fontWeight: '600'}}>{mois2(dateInf)}</span> au <span style={{fontWeight: '600'}}>{mois2(dateSup)}</span></div>
+                        <div>Frais matériel : <span style={{fontWeight: '600'}}>{frais + ' Fcfa'}</span></div>
                         <div>Total : <span style={{fontWeight: '600'}}>{clientSelect[0].total + ' Fcfa'}</span></div>
                         <div>Restant à payer : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
                     </div>
@@ -490,30 +692,34 @@ export default function Assurance() {
                         <thead>
                             <tr>
                                 <td>Designation</td>
-                                <td>Prix</td>
+                                <td>Qte</td>
+                                <td>Prix.U</td>
+                                <td>Prix.T</td>
                             </tr>
                         </thead>
                         <tbody>
                             {infosClient.map(item => {
-                                if (item.categorie === "service") {
+                                if (item.categorie !== "pharmacie") {
                                     return (
                                         <tr key={item.id} style={{fontWeight: '600'}}>
-                                            <td>{extraireCode(item.designation)}</td>
-                                            <td>{item.prix + ' Fcfa' }</td>
+                                            <td>{item.designation}</td>
+                                            <td>{item.qte}</td>
+                                            <td>{item.prix}</td>
+                                            <td>{item.prix_total + ' Fcfa' }</td>
                                         </tr>
                                     )
                                 }
                             })}
                         </tbody>
                     </table>
-                    <h1>Médicaments</h1>
+                    <h1>Pharmacie</h1>
                     <table>
                         <thead>
                             <tr>
                                 <td>Designation</td>
-                                <td>Pu</td>
                                 <td>Qte</td>
-                                <td>Prix total</td>
+                                <td>Prix.U</td>
+                                <td>Prix.T</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -522,9 +728,9 @@ export default function Assurance() {
                                     return (
                                         <tr key={item.id} style={{fontWeight: '600'}}>
                                             <td>{item.designation}</td>
-                                            <td>{(parseInt(item.prix) / parseInt(item.qte))}</td>
                                             <td>{item.qte}</td>
-                                            <td>{item.prix + ' Fcfa' }</td>
+                                            <td>{item.prix}</td>
+                                            <td>{item.prix_total + ' Fcfa' }</td>
                                         </tr>
                                     )
                                 }
@@ -532,7 +738,25 @@ export default function Assurance() {
                         </tbody>
                     </table>
                     <div className="valider-annuler">
-                        <button id="btn-save" onClick={sauvegarderFacture}>Terminé</button>
+                        <ExcelFile element={<button style={{backgroundColor: '#1b9d3f'}} filename="test" fileExtension="xlsx">Exporter</button>}>
+                            <ExcelSheet data={service} name="Imagerie-Laboratoire">
+                                <ExcelColumn label="DESIGNATION" value={"designation"} />
+                                <ExcelColumn label="QUANTITE" value="qte" />
+                                <ExcelColumn label="PRIX.U" value="prix" />
+                                <ExcelColumn label="PRIX.T" value="prix_total" />
+                            </ExcelSheet>
+                            <ExcelSheet data={pharmacie} name="Pharmacie">
+                                <ExcelColumn label="DESIGNATION" value="designation" />
+                                <ExcelColumn label="QUANTITE" value="qte" />
+                                <ExcelColumn label="PRIX.U" value="prix" />
+                                <ExcelColumn label="PRIX.T" value="prix_total" />
+                            </ExcelSheet>
+                            <ExcelSheet data={montants} name={"Totaux"}>
+                                <ExcelColumn label="total" value="total" />
+                                <ExcelColumn label="restant" value="reste" />
+                            </ExcelSheet>
+                        </ExcelFile>
+                        <button id="btn-save" onClick={sauvegarderFacture}>Terminer</button>
                     </div>
                 </div>
             </div>

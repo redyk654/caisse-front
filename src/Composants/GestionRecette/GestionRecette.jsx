@@ -66,6 +66,7 @@ export default function GestionRecette(props) {
     const [servicesSauvegarde, setServicesSauvegarde] = useState([]);
     const [categorie, setCategorie]= useState('');
     const [recetteRestante, setrecetteRestante] = useState(0);
+    const [frais, setFrais] = useState(0);
     const [montantRetire, setmontantRetire] = useState(0);
     const [caissier, setCaissier] = useState('');
     const [rerender, setRerender] = useState(false);
@@ -152,6 +153,28 @@ export default function GestionRecette(props) {
             const result = JSON.parse(req.responseText);
             setServices(result);
             setServicesSauvegarde(result);
+            fetchFraisMateriel();
+        });
+
+        req.send(data)
+    }
+
+    const fetchFraisMateriel = () => {
+        let dateD = dateDepart;
+        let dateF = dateFin;
+
+        const data = new FormData();
+        data.append('dateD', dateD);
+        data.append('dateF', dateF);
+        data.append('caissier', caissier);
+
+        const req = new XMLHttpRequest();
+        req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php?frais=oui`);
+
+        req.addEventListener('load', () => {
+            const result = JSON.parse(req.responseText);
+            console.log(result);
+            setFrais(result[0].frais);
         });
 
         req.send(data)
@@ -460,13 +483,13 @@ export default function GestionRecette(props) {
                             </button>
                         </div>
                         <div>
-                            Recette Total : <span style={{fontWeight: '600'}}>{recetteTotal + ' Fcfa'}</span>
+                            Recette : <span style={{fontWeight: '600'}}>{recetteTotal + ' Fcfa'}</span>
                         </div>
                         <div>
-                            Montant retiré : <span style={{fontWeight: '600'}}>{montantRetire + ' Fcfa'}</span>
+                            Frais matériel : <span style={{fontWeight: '600'}}>{frais + ' Fcfa'}</span>
                         </div>
                         <div>
-                            Recette Restante : <span style={{fontWeight: '600'}}>{recetteRestante + ' Fcfa'}</span>
+                            Total : <span style={{fontWeight: '600'}}>{(parseInt(recetteRestante) + parseInt(frais)) + ' Fcfa'}</span>
                         </div>
                     </div>
                     <div className="btn-valid-annul" style={{textAlign: 'center', marginTop: '10px',}}>

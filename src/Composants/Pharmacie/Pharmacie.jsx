@@ -213,32 +213,10 @@ export default function GestionFactures(props) {
         }
      }
 
-    //  const miseAjourFicheStock = () => {
-    //     let i = 0;
-    //     medocCommandes.map(item => {
 
-    //         const data2 = new FormData();
-    //         data2.append('produit', JSON.stringify(item));
 
-    //         // Envoi des données
-    //         const req2 = new XMLHttpRequest();
-    //         req2.open('POST', 'http://serveur/backend-cma/gestion_stock.php?remarque=sortie');
-            
-    //         // Une fois la requête charger on vide tout les états
-    //         req2.addEventListener('load', () => {
-    //             if (req2.status >= 200 && req2.status < 400) {
-    //                 i++
-    //                 if (i === medocCommandes.length) {
-
-    //                 }
-    //             }
-    //         });
-    //         req2.send(data2);
-    //     });
-    // }
-
-     const reglerFacture = () => {
-         if (parseInt(verse) >= parseInt(factureSelectionne[0].reste_a_payer)) {
+    const reglerFacture = () => {
+        if (parseInt(verse) >= parseInt(factureSelectionne[0].reste_a_payer)) {
              // Règlement de la facture
 
             const data = new FormData();
@@ -269,6 +247,7 @@ export default function GestionFactures(props) {
                             setMessageErreur('');
                             i++;
                             if (i === detailsFacture.length) {
+                                enregistrerAssurance()
                                 setSupp(false);
                                 setModalReussi(true);
                                 setFiltrer(false);
@@ -294,12 +273,44 @@ export default function GestionFactures(props) {
 
             req.send(data);
         }
-     }
+    }
 
-     const reinitialsation = () => {
-         setverse(0);
-         setrelicat(0);
-         setresteaPayer(0);
+    const enregistrerAssurance = () => {
+        if(factureSelectionne.length > 0 && detailsFacture.length > 0 && factureSelectionne[0].assurance !== "aucune") {
+
+            detailsFacture.map(item => {
+                const data = new FormData();
+    
+                data.append('categorie', 'pharmacie');
+                data.append('id_facture', factureSelectionne[0].id);
+                data.append('patient', factureSelectionne[0].patient);
+                data.append('designation', item.designation);
+                data.append('quantite', item.quantite);
+                data.append('prix_total', item.prix_total);
+
+                
+                const req = new XMLHttpRequest();
+                req.open('POST', 'http://serveur/backend-cma/data_assurance.php');
+                
+                req.send(data);
+                
+                req.addEventListener("load", function () {
+                    // La requête n'a pas réussi à atteindre le serveur
+                    setMessageErreur('');
+                });
+                
+                req.addEventListener("error", function () {
+                    // La requête n'a pas réussi à atteindre le serveur
+                    setMessageErreur('Erreur réseau');
+                });
+            })
+        }
+    }
+
+    const reinitialsation = () => {
+        setverse(0);
+        setrelicat(0);
+        setresteaPayer(0);
      }
 
     const filtrerListe = (e) => {
@@ -533,28 +544,6 @@ export default function GestionFactures(props) {
                             </div>
                         )}
                     </div>
-                    {/* <div>
-                        {factureSelectionne.length > 0 && (
-                            <div style={{display: 'none'}}>
-                                <FacturePharmacie
-                                    ref={componentRef}
-                                    medocCommandes={detailsFacture}
-                                    idFacture={factureSelectionne[0].id}
-                                    patient={factureSelectionne[0].patient}
-                                    prixTotal={factureSelectionne[0].prix_total}
-                                    reduction={factureSelectionne[0].reduction}
-                                    aPayer={factureSelectionne[0].a_payer}
-                                    montantVerse={factureSelectionne[0].montant_verse}
-                                    relicat={factureSelectionne[0].relicat}
-                                    resteaPayer={factureSelectionne[0].reste_a_payer}
-                                    date={factureSelectionne[0].date_heure}
-                                    caissier={factureSelectionne[0].caissier}
-                                    patient={factureSelectionne[0].patient}
-                                    assurance={factureSelectionne[0].assurance}
-                                />
-                            </div>
-                        )}
-                    </div> */}
                 </div>
             </div>
         </div>

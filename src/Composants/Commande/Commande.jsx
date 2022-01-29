@@ -347,6 +347,8 @@ export default function Commande(props) {
 
         const data = new FormData();
 
+        montantFrais === 500 ? data.append('frais', 500) : data.append('frais', 0);
+
         data.append('id', id);
         data.append('caissier', props.nomConnecte);
         nomPatient && data.append('patient', nomPatient);
@@ -405,7 +407,6 @@ export default function Commande(props) {
     }
 
     const enregistrerAssurance = (data) => {
-        data.append('categorie', 'service');
         data.append('quantite', qteDesire);
 
         const req = new XMLHttpRequest();
@@ -443,19 +444,12 @@ export default function Commande(props) {
             medocCommandes.map(item => {
 
                 const data2 = new FormData();
-                if (i === 0) {
-                    if (montantFrais > 0) {
-                        data2.append('frais', 500);
-                    }
-                } else {
-                    data2.append('frais', 0);
-                }
 
                 nomPatient && data2.append('patient', nomPatient);
                 data2.append('id_facture', id);
                 data2.append('designation', item.designation);
                 data2.append('prix_total', item.prix);
-                data2.append('catego', item.categorie);
+                data2.append('categorie', item.categorie);
                 data2.append('caissier', props.nomConnecte);
                 data2.append('reduction', remise);
                 assurance !== assuranceDefaut && enregistrerAssurance(data2);
