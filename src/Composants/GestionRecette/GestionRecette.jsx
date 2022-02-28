@@ -84,7 +84,7 @@ export default function GestionRecette(props) {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/recuperer_caissier.php');
+        req.open('GET', 'http://localhost/backend-cma/recuperer_caissier.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -110,22 +110,13 @@ export default function GestionRecette(props) {
             data.append('caissier', caissier);
     
             const req = new XMLHttpRequest();
-            req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php`);
+            req.open('POST', `http://localhost/backend-cma/gestion_pourcentage.php`);
     
             req.addEventListener('load', () => {
                 fetchDetails();
+                recupererRecetteTotal(data);
                 const result = JSON.parse(req.responseText);
                 sethistorique(result);
-                let recette = 0;
-                if (result.length > 0) {
-                    result.map(item => {
-                        recette += parseInt(item.recette);
-                    })
-                    setRecetteTotal(recette);
-                    setrecetteRestante(recette);
-                } else {
-                    setRecetteTotal(0);
-                }
             });
     
             req.send(data);
@@ -137,6 +128,26 @@ export default function GestionRecette(props) {
         setrecetteRestante(recetteTotal - montantRetire);
     }, [montantRetire]);
 
+    const recupererRecetteTotal = (data) => {
+        const req = new XMLHttpRequest();
+        req.open('POST', 'http://localhost/backend-cma/recuperer_recette.php');
+
+        req.addEventListener('load', () => {
+            if(req.status >= 200 && req.status < 400) {
+                let result = JSON.parse(req.responseText);
+                result = result.filter(item => (item.caissier === caissier));
+                
+                let recette = 0;
+                result.forEach(item => {
+                    recette += parseInt(item.a_payer);
+                });
+                setRecetteTotal(recette);
+            }
+        });
+        req.send(data);
+    }
+
+
     const fetchDetails = () => {
         let dateD = dateDepart;
         let dateF = dateFin;
@@ -147,34 +158,12 @@ export default function GestionRecette(props) {
         data.append('caissier', caissier);
 
         const req = new XMLHttpRequest();
-        req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php?details=oui`);
+        req.open('POST', `http://localhost/backend-cma/gestion_pourcentage.php?details=oui`);
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
             setServices(result);
             setServicesSauvegarde(result);
-            fetchFraisMateriel();
-        });
-
-        req.send(data)
-    }
-
-    const fetchFraisMateriel = () => {
-        let dateD = dateDepart;
-        let dateF = dateFin;
-
-        const data = new FormData();
-        data.append('dateD', dateD);
-        data.append('dateF', dateF);
-        data.append('caissier', caissier);
-
-        const req = new XMLHttpRequest();
-        req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php?frais=oui`);
-
-        req.addEventListener('load', () => {
-            const result = JSON.parse(req.responseText);
-            console.log(result);
-            setFrais(result[0].frais);
         });
 
         req.send(data)
@@ -305,7 +294,7 @@ export default function GestionRecette(props) {
     //         data.append('recette_restante', item.recetteRestante);
 
     //         const req = new XMLHttpRequest();
-    //         req.open('POST', 'http://serveur/backend-cma/gestion_pourcentage.php');
+    //         req.open('POST', 'http://localhost/backend-cma/gestion_pourcentage.php');
 
     //         req.addEventListener('load', () => {
     //             i++
@@ -331,7 +320,7 @@ export default function GestionRecette(props) {
         data.append('regisseur', props.nomConnecte);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_pourcentage.php');
+        req.open('POST', 'http://localhost/backend-cma/gestion_pourcentage.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -484,12 +473,6 @@ export default function GestionRecette(props) {
                         </div>
                         <div>
                             Recette : <span style={{fontWeight: '600'}}>{recetteTotal + ' Fcfa'}</span>
-                        </div>
-                        <div>
-                            Frais matériel : <span style={{fontWeight: '600'}}>{frais + ' Fcfa'}</span>
-                        </div>
-                        <div>
-                            Total : <span style={{fontWeight: '600'}}>{(parseInt(recetteRestante) + parseInt(frais)) + ' Fcfa'}</span>
                         </div>
                     </div>
                     <div className="btn-valid-annul" style={{textAlign: 'center', marginTop: '10px',}}>

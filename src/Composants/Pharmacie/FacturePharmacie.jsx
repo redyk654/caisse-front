@@ -32,7 +32,7 @@ const table_styles = {
     fontSize: 8,
 }
 
-export default class Facture extends Component {
+export default class FacturePharmacie extends Component {
 
     mois = (str) => {
 

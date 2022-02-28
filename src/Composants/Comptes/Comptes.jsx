@@ -52,7 +52,7 @@ export default function Comptes(props) {
         // Récupération des comptes
 
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/recuperer_caissier.php');
+        req.open('GET', 'http://localhost/backend-cma/recuperer_caissier.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -130,7 +130,7 @@ export default function Comptes(props) {
             data.append('role', document.querySelector('form').role.value);
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/enregistrer_caissier.php');
+            req.open('POST', 'http://localhost/backend-cma/enregistrer_caissier.php');
 
             req.addEventListener('load', () => {
                 setNvCompte(utilisateur);
@@ -170,7 +170,7 @@ export default function Comptes(props) {
         data.append('montant', recettejour.recette);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_caisse.php');
+        req.open('POST', 'http://localhost/backend-cma/gestion_caisse.php');
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {
@@ -185,7 +185,7 @@ export default function Comptes(props) {
         // Suppression d'un compte
         if (compteSelectionne.length > 0) {
             const req = new XMLHttpRequest();
-            req.open('GET', `http://serveur/backend-cma/supprimer_compte.php?compte=${compteSelectionne[0].nom_user}`);
+            req.open('GET', `http://localhost/backend-cma/supprimer_compte.php?compte=${compteSelectionne[0].nom_user}`);
 
             req.addEventListener('load', () => {
                 if(req.status >= 200 && req.status < 400) {

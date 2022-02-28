@@ -13,6 +13,8 @@ export default function Apercu(props) {
 
     let date_select1 = useRef();
     let date_select2 = useRef();
+    let heure_select1 = useRef();
+    let heure_select2 = useRef();
 
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);
 
@@ -24,6 +26,7 @@ export default function Apercu(props) {
     const [dateDepart, setdateDepart] = useState('');
     const [dateFin, setdateFin] = useState('');
     const [caissier, setCaissier] = useState('');
+    const [assurance, setAssurance] = useState('non');
     const [labo, setLabo] = useState(0);
     const [radio, setRadio] = useState(0);
     const [consul, setConsul] = useState(0);
@@ -36,71 +39,48 @@ export default function Apercu(props) {
 
 
     useEffect(() => {
-        startChargement();
 
-        const d = new Date();
-        let dateD;
-        let dateF;
+        if (dateDepart.length > 0 && dateFin.length > 0) {
+            
+            console.log(dateDepart, dateFin);
+            startChargement();
+    
+            let dateD = dateDepart;
+            let dateF = dateFin;
 
-        if (dateDepart.length === 10) {
-            dateD = dateDepart;
-            dateF = dateFin;
-        } else {
-            dateD = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-            dateF = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-            setdateJour(d.toLocaleString().substr(0, 10));
+            const data = new FormData();
+            data.append('dateD', dateD);
+            data.append('dateF', dateF);
+            data.append('caissier', caissier);
+            data.append('assurance', assurance);
+    
+            const req = new XMLHttpRequest();
+    
+            req.open('POST', `http://localhost/backend-cma/apercu.php`);
+    
+            req.addEventListener('load', () => {
+                setMessageErreur('');
+                recupererRecetteTotal(data);
+                const result = JSON.parse(req.responseText);
+                sethistorique(result);
+                stopChargement();
+            });
+    
+            req.addEventListener("error", function () {
+                // La requête n'a pas réussi à atteindre le localhost
+                setMessageErreur('Erreur réseau');
+            });
+    
+            req.send(data);
         }
 
-        const data = new FormData();
-        data.append('dateD', dateD);
-        data.append('dateF', dateF);
-        data.append('caissier', caissier);
-
-        const req = new XMLHttpRequest();
-
-        if (dateD === dateF) {
-            req.open('POST', `http://serveur/backend-cma/apercu.php?moment=jour`);
-        } else {
-            req.open('POST', `http://serveur/backend-cma/apercu.php?moment=nuit`);
-        }
-
-        req.addEventListener('load', () => {
-            setMessageErreur('');
-            recuperationFrais();
-            const result = JSON.parse(req.responseText);
-            sethistorique(result);
-            stopChargement();
-            let recette = 0;
-            if (result.length > 0) {
-                result.map(item => {
-                    recette += parseInt(item.prix_total);
-                })
-                setRecetteTotal(recette);
-            } else {
-                setRecetteTotal(0);
-            }
-        });
-
-        req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
-            setMessageErreur('Erreur réseau');
-        });
-
-        req.send(data);
-
-    }, [dateDepart, dateFin, caissier]);
-
-    useEffect(() => {
-        if(historique.length > 0) {
-            calculerRecetteParCategorie(historique)
-        }
-    }, [historique]);
+    }, [dateDepart, dateFin, caissier, assurance]);
 
     useEffect(() => {
         // Récupération des comptes
 
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/recuperer_caissier.php');
+        req.open('GET', 'http://localhost/backend-cma/recuperer_caissier.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -112,41 +92,73 @@ export default function Apercu(props) {
         });
 
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
+            // La requête n'a pas réussi à atteindre le localhost
             setMessageErreur('Erreur réseau');
         });
 
         req.send();
     }, []);
 
+    const recupererRecetteTotal = (data) => {
+        const req = new XMLHttpRequest();
+        req.open('POST', 'http://localhost/backend-cma/recuperer_recette.php');
+
+        req.addEventListener('load', () => {
+            if(req.status >= 200 && req.status < 400) {
+                setMessageErreur('');
+                let result = JSON.parse(req.responseText);
+
+                if (props.role === "caissier") {
+                    result = result.filter(item => (item.caissier === props.nomConnecte));
+                } else {
+                    result = result.filter(item => (item.caissier === caissier));
+                }
+                
+                let recette = 0;
+                if (assurance === "non") {
+                    result.forEach(item => {
+                        if (item.assurance === "aucune") {
+                            recette += parseInt(item.a_payer);
+                        }
+                    });
+                } else {
+                    result.forEach(item => {
+                        if (item.assurance !== "aucune") {
+                            recette += parseInt(item.a_payer);
+                        }
+                    });
+                }
+                setRecetteTotal(recette);
+            }
+        });
+
+        req.addEventListener("error", function () {
+            // La requête n'a pas réussi à atteindre le localhost
+            setMessageErreur('Erreur réseau');
+        });
+
+        req.send(data);
+    }
+
+    const idUnique = () => {
+        // Création d'un identifiant unique pour la facture
+        return Math.floor((1 + Math.random()) * 0x100000000);        
+    }
+
     const recuperationFrais = () => {
 
-        const d = new Date();
-        let dateD;
-        let dateF;
-
-        if (dateDepart.length === 10) {
-            dateD = dateDepart;
-            dateF = dateFin;
-        } else {
-            dateD = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-            dateF = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-            setdateJour(d.toLocaleString().substr(0, 10));
-        }
+        let dateD = dateDepart;
+        let dateF = dateFin;
 
         const data = new FormData();
         data.append('dateD', dateD);
         data.append('dateF', dateF);
         data.append('caissier', caissier);
+        data.append('assurance', assurance);
 
         const req = new XMLHttpRequest();
         // Récupération des frais matériel
-
-        if (dateD === dateF) {
-            req.open('POST', `http://serveur/backend-cma/frais.php?moment=jour`);
-        } else {
-            req.open('POST', `http://serveur/backend-cma/frais.php?moment=nuit`);
-        }
+        req.open('POST', `http://localhost/backend-cma/frais.php`);
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -157,7 +169,7 @@ export default function Apercu(props) {
         });
 
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
+            // La requête n'a pas réussi à atteindre le localhost
             setMessageErreur('Erreur réseau');
         });
 
@@ -165,53 +177,9 @@ export default function Apercu(props) {
 
     }
 
-    const resetCategorie = () => {
-        setLabo(0);
-        setRadio(0);
-        setChr(0);
-        setMater(0);
-        setConsul(0);
-        setEcho(0);
-        setUpec(0);
-        setMed(0);
-    }
-
-    const calculerRecetteParCategorie = (acte) => {
-        const codes = ['RX', 'LAB', 'MA', 'MED', 'CHR', 'CO', 'UPEC', 'ECHO'];
-        let lab = 0, rx = 0, ma = 0, me = 0, ch = 0, co = 0, up = 0, ec = 0;
-
-        acte.map(item => {
-            if (item.designation.toUpperCase().indexOf(codes[0]) === 0) {
-                rx += parseInt(item.prix_total);
-                setRadio(rx);
-            } else if (item.designation.toUpperCase().indexOf(codes[1]) === 0) {
-                lab += parseInt(item.prix_total);
-                setLabo(lab);
-            } else if (item.designation.toUpperCase().indexOf(codes[2]) === 0) {
-                ma += parseInt(item.prix_total);
-                setMater(ma);
-            } else if (item.designation.toUpperCase().indexOf(codes[3]) === 0) {
-                me += parseInt(item.prix_total);
-                setMed(me);
-            } else if (item.designation.toUpperCase().indexOf(codes[4]) === 0) {
-                ch += parseInt(item.prix_total);
-                setChr(ch);
-            } else if (item.designation.toUpperCase().indexOf(codes[5]) === 0) {
-                co += parseInt(item.prix_total);
-                setConsul(co);
-            } else if (item.designation.toUpperCase().indexOf(codes[6]) === 0) {
-                up += parseInt(item.prix_total);
-                setUpec(up);
-            } else if (item.designation.toUpperCase().indexOf(codes[7]) === 0) {
-                ec += parseInt(item.prix_total);
-                setEcho(ec);
-            }
-        });
-    }
-
     const rechercherHistorique = () => {
-        setdateDepart(date_select1.current.value);
-        setdateFin(date_select2.current.value);
+        setdateDepart(date_select1.current.value + ' ' + heure_select1.current.value + ':00');
+        setdateFin(date_select2.current.value + ' ' + heure_select2.current.value + ':59');
         setCaissier(document.getElementById('caissier').value);
     }
 
@@ -273,10 +241,19 @@ export default function Apercu(props) {
                             <p>
                                 <label htmlFor="">Du : </label>
                                 <input type="date" ref={date_select1} />
+                                <input type="time" ref={heure_select1} />
                             </p>
                             <p>
                                 <label htmlFor="">Au : </label>
                                 <input type="date" ref={date_select2} />
+                                <input type="time" ref={heure_select2} />
+                            </p>
+                            <p>
+                                <label htmlFor="assure">Categorie : </label>
+                                <select name="" id="assure" onChange={(e) => setAssurance(e.target.value)}>
+                                    <option value="non">non assuré</option>
+                                    <option value="oui">assuré</option>
+                                </select>
                             </p>
                             <p>
                                 <label htmlFor="">Caissier : </label>
@@ -291,8 +268,6 @@ export default function Apercu(props) {
                         </div>
                         <button onClick={rechercherHistorique}>rechercher</button>
                         <div>Recette : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
-                        <div>Frais matériel : <span style={{fontWeight: '700'}}>{reccetteTotal ? montantFrais + ' Fcfa' : '0 Fcfa'}</span></div>
-                        <div>Total : <span style={{fontWeight: '700'}}>{reccetteTotal ? (reccetteTotal + montantFrais) + ' Fcfa' : '0 Fcfa'}</span></div>
                         <div style={{display: 'none',}}>
                             <div style={{width: '50%'}}>Laboratoire : <span style={{fontWeight: '700'}}>{reccetteTotal ? labo + ' Fcfa' : '0 Fcfa'}</span></div>
                             <div style={{width: '50%'}}>Radiologie : <span style={{fontWeight: '700'}}>{reccetteTotal ? radio + ' Fcfa' : '0 Fcfa'}</span></div>
@@ -314,7 +289,7 @@ export default function Apercu(props) {
                         </thead>
                         <tbody>
                             {historique.length > 0 && historique.map(item => (
-                                <tr>
+                                <tr key={item.id}>
                                     <td>{extraireCode(item.designation)}</td>
                                     <td>{item.prix_total + ' Fcfa'}</td>
                                 </tr>
@@ -336,7 +311,6 @@ export default function Apercu(props) {
                     ref={componentRef}
                     historique={historique}
                     recetteTotal={reccetteTotal}
-                    montantFrais={montantFrais}
                     nomConnecte={props.nomConnecte}
                     dateDepart={dateDepart}
                     dateFin={dateFin}

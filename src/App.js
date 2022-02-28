@@ -43,13 +43,13 @@ function App() {
 
       req.send();
     }
-  },[role, connecter])
+  },[role, connecter]);
 
   useEffect(() => {
     if(role === role3) {
       setOnglet(5);
     } else if (role === role1) {
-      setOnglet(3)
+      setOnglet(3);
     } else if (role === role4) {
       setOnglet(9)
     } else {
@@ -100,8 +100,9 @@ function App() {
         <main className='app'>
           <Entete nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} role={role} />
           <section className="conteneur-onglets">
-            <div className="onglets-blocs" style={{width: '60%'}}>
+            <div className="onglets-blocs" style={{width: '70%'}}>
               <div className={`tab ${onglet === 3 ? 'active' : ''}`} onClick={ () => {setOnglet(3)}}>Historique</div>
+              <div className={`tab ${onglet === 8 ? 'active' : ''}`} onClick={ () => {setOnglet(8)}}>Aperçu</div>
               <div className={`tab ${onglet === 5 ? 'active' : ''}`} onClick={ () => {setOnglet(5)}}>Les états</div>
               <div className={`tab ${onglet === 11 ? 'active' : ''}`} onClick={ () => {setOnglet(11)}}>Modifier</div>
               <div className={`tab ${onglet === 4 ? 'active' : ''}`} onClick={ () => {setOnglet(4)}}>Comptes</div>
@@ -117,11 +118,11 @@ function App() {
         <main className='app'>
           <Entete nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} role={role} />
           <section className="conteneur-onglets">
-            <div className="onglets-blocs" style={{width: '50%'}}>
+            <div className="onglets-blocs" style={{width: '55%'}}>
               <div className={`tab ${onglet === 1 ? 'active' : ''}`} onClick={ () => {setOnglet(1)}}>Services</div>
               <div className={`tab ${onglet === 7 ? 'active' : ''}`} onClick={ () => {setOnglet(7)}}>Pharmacie</div>
-              <div className={`tab ${onglet === 2 ? 'active' : ''}`} onClick={ () => {setOnglet(2)}}>Factures-services</div>
               <div className={`tab ${onglet === 8 ? 'active' : ''}`} onClick={ () => {setOnglet(8)}}>Aperçu</div>
+              <div className={`tab ${onglet === 2 ? 'active' : ''}`} onClick={ () => {setOnglet(2)}}>Factures-services</div>
             </div>
             <div className="onglets-contenu">
                 {contenu}
@@ -134,8 +135,9 @@ function App() {
         <main className='app'>
           <Entete nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} role={role} />
           <section className="conteneur-onglets">
-            <div className="onglets-blocs" style={{width: '55%'}}>
+            <div className="onglets-blocs" style={{width: '70%'}}>
               <div className={`tab ${onglet === 5 ? 'active' : ''}`} onClick={ () => {setOnglet(5)}}>Les états</div>
+              <div className={`tab ${onglet === 8 ? 'active' : ''}`} onClick={ () => {setOnglet(8)}}>Aperçu</div>
               <div className={`tab ${onglet === 3 ? 'active' : ''}`} onClick={ () => {setOnglet(3)}}>Historique</div>
               <div className={`tab ${onglet === 11 ? 'active' : ''}`} onClick={ () => {setOnglet(11)}}>Modifier</div>
               <div className={`tab ${onglet === 4 ? 'active' : ''}`} onClick={ () => {setOnglet(4)}}>Comptes</div>

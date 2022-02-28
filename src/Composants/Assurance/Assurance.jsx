@@ -89,10 +89,12 @@ export default function Assurance() {
 
             clientSelect[0].factures.map(item => {
                 const req = new XMLHttpRequest();
-                req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item}`);
+                req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture=${item}`);
                 req.addEventListener('load', () => {
                     i++;
                     result = [...result, ...JSON.parse(req.responseText)];
+                    console.log(result);
+
 
                     if (clientSelect[0].factures.length === i) {
                         result = traiterDoublons(result);
@@ -107,7 +109,6 @@ export default function Assurance() {
                                 });
                             }
                         });
-
                         setInfosClient(result);
                         setReste((parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)));
                         setMontants([{reste: reste, total: clientSelect[0].total}]);
@@ -125,7 +126,7 @@ export default function Assurance() {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/gestion_patients.php');
+        req.open('GET', 'http://localhost/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -138,7 +139,7 @@ export default function Assurance() {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://serveur/backend-cma/assurances.php?liste');
+        req.open('GET', 'http://localhost/backend-cma/assurances.php?liste');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -161,7 +162,6 @@ export default function Assurance() {
 
         setPharmacie(p);
         setService(s);
-        console.log(s,p);
     }
 
     const traiterDoublons = (result) => {
@@ -238,21 +238,18 @@ export default function Assurance() {
         data.append('assurance', assurance);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=service');
+        req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=service');
 
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
-            let f = 0;
-            result.forEach(item => {
-                f += parseInt(item.frais);
-            });
-            setFrais(f);
 
             const req2 = new XMLHttpRequest();
-            req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
+            req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
+                console.log(result);
+
                 traiterData(result);
                 traiterDateConsommation(result);
             });
@@ -313,11 +310,12 @@ export default function Assurance() {
         result.forEach(item => {
             if (clients.indexOf(item.patient) === -1) {
                 clients.push(item.patient);
-                listeProvisoiresClient.push({id_fac: item.id_fac, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), type_assurance: item.type_assurance, assurance: item.assurance})
+                listeProvisoiresClient.push({id_fac: item.id_fac, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), frais: parseInt(item.frais), type_assurance: item.type_assurance, assurance: item.assurance});
             } else {
                 listeProvisoiresClient.forEach(item2 => {
                     if (item.patient === item2.nom){
                         item2.factures.push(item.id);
+                        item.frais += parseInt(item.frais);
                         item2.total += parseInt(item.prix_total);
                     }
                 })
@@ -328,9 +326,9 @@ export default function Assurance() {
         setListeClientsSauvegarde(listeProvisoiresClient);
     }
 
-    const afficherInfos = (e, nom, factures, total, type_assurance, assurance) => {
+    const afficherInfos = (e, nom, frais, factures, total, type_assurance, assurance) => {
         setInfosClient([]);
-        setClientSelect([{nom: nom, factures: factures, total: total, type_assurance: type_assurance, assurance: assurance}]);
+        setClientSelect([{nom: nom, frais: frais, factures: factures, total: total, type_assurance: type_assurance, assurance: assurance}]);
     }
 
     const idUnique = () => {
@@ -348,7 +346,7 @@ export default function Assurance() {
             data.append('categorie', 'service');
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -360,7 +358,7 @@ export default function Assurance() {
                         data.append('categorie', 'pharmacie');
 
                         const req2 = new XMLHttpRequest();
-                        req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+                        req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
                         req2.addEventListener('load', () => {
                             i++;
@@ -382,6 +380,31 @@ export default function Assurance() {
         });
     }
 
+    
+    const sauvegarderFacture = () => {
+        // Sauvegarde d'une facture d'assurance
+        if (clientSelect.length > 0) {
+            const id = idUnique();
+            const data = new FormData();
+            data.append('id_facture', id);
+            data.append('nom', clientSelect[0].nom);
+            data.append('assurance', assurance);
+            data.append('assurance_type', clientSelect[0].type_assurance);
+            data.append('periode', "du " + mois2(dateInf) + " au " + mois2(dateSup));
+            data.append('total', clientSelect[0].total);
+            data.append('reste', reste);
+    
+            const req = new XMLHttpRequest();
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
+    
+            req.addEventListener('load', () => {
+                enregistrerIdFactures(id);
+            });
+    
+            req.send(data);
+        }
+    }
+
     const enregistrerIdFactures = (id) => {
         // Mise à jour des status des factures
         let i = 0;
@@ -391,7 +414,7 @@ export default function Assurance() {
             data.append('id_general', id);
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -412,7 +435,7 @@ export default function Assurance() {
         data.append('type_assurance', typeAssurance);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_patients.php');
+        req.open('POST', 'http://localhost/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             setModalPatient(false);
@@ -427,7 +450,7 @@ export default function Assurance() {
         data.append('designation', nvAssurance);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/assurances.php');
+        req.open('POST', 'http://localhost/backend-cma/assurances.php');
 
         req.addEventListener('load', () => {
             setFetch(!fecth);
@@ -494,7 +517,7 @@ export default function Assurance() {
         data.append('supprime', assuranceSelect);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/assurances.php');
+        req.open('POST', 'http://localhost/backend-cma/assurances.php');
 
         req.addEventListener('load', () => {
             setFetch(!fecth);
@@ -502,30 +525,6 @@ export default function Assurance() {
         });
 
         req.send(data);
-    }
-
-    const sauvegarderFacture = () => {
-        // Sauvegarde d'une facture d'assurance
-        if (clientSelect.length > 0) {
-            const id = idUnique();
-            const data = new FormData();
-            data.append('id_facture', id);
-            data.append('nom', clientSelect[0].nom);
-            data.append('assurance', assurance);
-            data.append('assurance_type', clientSelect[0].type_assurance);
-            data.append('periode', "du " + dateInf + " au " + dateSup);
-            data.append('total', clientSelect[0].total);
-            data.append('reste', parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100));
-    
-            const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
-    
-            req.addEventListener('load', () => {
-                enregistrerIdFactures(id);
-            });
-    
-            req.send(data);
-        }
     }
 
     const extraireCode = (designation) => {
@@ -668,7 +667,7 @@ export default function Assurance() {
                     <h1>Listes des clients</h1>
                     <ul>
                         {listeClients.length > 0 && listeClients.map(item => (
-                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.factures, item.total, item.type_assurance, item.assurance)}>{item.nom}</li>
+                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.frais, item.factures, item.total, item.type_assurance, item.assurance)}>{item.nom}</li>
                         ))}
                     </ul>
                 </div>
@@ -681,7 +680,7 @@ export default function Assurance() {
                         <div>Couvert par : <span style={{fontWeight: '600'}}>{clientSelect[0].assurance}</span></div>
                         <div>Pourcentage : <span style={{fontWeight: '600'}}>{clientSelect[0].type_assurance}</span></div>
                         <div>Periode : <span style={{fontWeight: '600'}}>{mois2(dateInf)}</span> au <span style={{fontWeight: '600'}}>{mois2(dateSup)}</span></div>
-                        <div>Frais matériel : <span style={{fontWeight: '600'}}>{frais + ' Fcfa'}</span></div>
+                        <div>Frais matériel : <span style={{fontWeight: '600'}}>{clientSelect[0].frais + ' Fcfa'}</span></div>
                         <div>Total : <span style={{fontWeight: '600'}}>{clientSelect[0].total + ' Fcfa'}</span></div>
                         <div>Restant à payer : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
                     </div>

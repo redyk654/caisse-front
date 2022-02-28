@@ -3,6 +3,7 @@ import FacturePharmacie from './FacturePharmacie';
 import './Pharmacie.css';
 import ReactToPrint from 'react-to-print';
 import Modal from 'react-modal';
+import RecettePharmcie from './RecettePharmacie';
 
 const customStyles1 = {
     content: {
@@ -54,6 +55,7 @@ const table_styles = {
 export default function GestionFactures(props) {
 
     const componentRef = useRef();
+    const componentRef2 = useRef();
 
     let date_select1 = useRef();
     let date_select2 = useRef();
@@ -64,7 +66,7 @@ export default function GestionFactures(props) {
     const [verse, setverse] = useState(0);
     const [relicat, setrelicat] = useState(0);
     const [resteaPayer, setresteaPayer] = useState(0);
-    const [filtrer, setFiltrer] = useState(false);
+    const [filtrer, setFiltrer] = useState(true);
     const [manquantTotal, setManquantTotal] = useState(0);
     const [factureSelectionne, setfactureSelectionne] = useState([]);
     const [detailsFacture, setdetailsFacture] = useState([]);
@@ -82,11 +84,14 @@ export default function GestionFactures(props) {
     useEffect(() => {
         setFactures([])
         setfactureSauvegarde([]);
+        setdetailsFacture([]);
+        reinitialsation();
+        setfactureSelectionne([]);
         const req = new XMLHttpRequest();
         if (filtrer) {
-            req.open('GET', `http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui&caissier=${props.nomConnecte}`);
+            req.open('GET', `http://localhost/backend-cma/factures_pharmacie.php?filtrer=oui&caissier=${props.nomConnecte}`);
             const req2 = new XMLHttpRequest();
-            req2.open('GET', 'http://serveur/backend-cma/factures_pharmacie.php?filtrer=oui&manquant');
+            req2.open('GET', 'http://localhost/backend-cma/factures_pharmacie.php?filtrer=oui&manquant');
             req2.addEventListener('load', () => {
                 setMessageErreur('');
                 const result = JSON.parse(req2.responseText);
@@ -94,17 +99,17 @@ export default function GestionFactures(props) {
             })
 
             req2.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le serveur
+                // La requête n'a pas réussi à atteindre le localhost
                 setMessageErreur('Erreur réseau');
             });
 
             req2.send();
 
         } else {
-            req.open('GET', 'http://serveur/backend-cma/factures_pharmacie.php');
+            req.open('GET', 'http://localhost/backend-cma/factures_pharmacie.php');
         }
         req.addEventListener("load", () => {
-            if (req.status >= 200 && req.status < 400) { // Le serveur a réussi à traiter la requête
+            if (req.status >= 200 && req.status < 400) { // Le localhost a réussi à traiter la requête
                 setMessageErreur('');
                 const result = JSON.parse(req.responseText);
                 setFactures(result);
@@ -116,7 +121,7 @@ export default function GestionFactures(props) {
             }
         });
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
+            // La requête n'a pas réussi à atteindre le localhost
             setMessageErreur('Erreur réseau');
         });
 
@@ -140,15 +145,14 @@ export default function GestionFactures(props) {
     
             const req = new XMLHttpRequest();
             if (dateD === dateF) {
-                req.open('POST', `http://serveur/backend-cma/recette_pharmacie.php?moment=jour`);
+                req.open('POST', `http://localhost/backend-cma/recette_pharmacie.php?moment=jour`);
             } else {
-                req.open('POST', `http://serveur/backend-cma/recette_pharmacie.php?moment=nuit`);
+                req.open('POST', `http://localhost/backend-cma/recette_pharmacie.php?moment=nuit`);
             }
     
             req.addEventListener('load', () => {
                 setMessageErreur('');
                 const result = JSON.parse(req.responseText);
-                console.log(result);
                 if (isNaN(result[0].recette)) {
                     setRecetteTotal(0);
                 } else {
@@ -157,7 +161,7 @@ export default function GestionFactures(props) {
             });
 
             req.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le serveur
+                // La requête n'a pas réussi à atteindre le localhost
                 setMessageErreur('Erreur réseau');
             });
     
@@ -171,7 +175,7 @@ export default function GestionFactures(props) {
         if (factureSelectionne.length > 0) {
             const req = new XMLHttpRequest();
     
-            req.open('GET', `http://serveur/backend-cma/factures_pharmacie.php?id=${factureSelectionne[0].id}`);
+            req.open('GET', `http://localhost/backend-cma/factures_pharmacie.php?id=${factureSelectionne[0].id}`);
     
             req.addEventListener('load', () => {
                 setMessageErreur('');
@@ -180,7 +184,7 @@ export default function GestionFactures(props) {
             });
 
             req.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le serveur
+                // La requête n'a pas réussi à atteindre le localhost
                 setMessageErreur('Erreur réseau');
             });
     
@@ -229,7 +233,7 @@ export default function GestionFactures(props) {
             data.append('caissier', props.nomConnecte);
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://serveur/backend-cma/factures_pharmacie.php')
+            req.open('POST', 'http://localhost/backend-cma/factures_pharmacie.php')
 
             req.addEventListener('load', () => {
                 // Mise à jour des stocks des médicaments vendus
@@ -240,7 +244,7 @@ export default function GestionFactures(props) {
                     data1.append('produit', JSON.stringify(item));
 
                     const req1 = new XMLHttpRequest();
-                    req1.open('POST', 'http://serveur/backend-cma/maj_medocs.php');
+                    req1.open('POST', 'http://localhost/backend-cma/maj_medocs.php');
 
                     req1.addEventListener("load", function () {
                         if (req1.status >= 200 && req1.status < 400) {
@@ -250,13 +254,12 @@ export default function GestionFactures(props) {
                                 enregistrerAssurance()
                                 setSupp(false);
                                 setModalReussi(true);
-                                setFiltrer(false);
                             }
                         }
                     });
 
                     req1.addEventListener("error", function () {
-                        // La requête n'a pas réussi à atteindre le serveur
+                        // La requête n'a pas réussi à atteindre le localhost
                         setMessageErreur('Erreur réseau');
                     });
             
@@ -266,7 +269,7 @@ export default function GestionFactures(props) {
             });
 
             req.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le serveur
+                // La requête n'a pas réussi à atteindre le localhost
                 setMessageErreur('Erreur réseau');
             });
     
@@ -290,17 +293,17 @@ export default function GestionFactures(props) {
 
                 
                 const req = new XMLHttpRequest();
-                req.open('POST', 'http://serveur/backend-cma/data_assurance.php');
+                req.open('POST', 'http://localhost/backend-cma/data_assurance.php');
                 
                 req.send(data);
                 
                 req.addEventListener("load", function () {
-                    // La requête n'a pas réussi à atteindre le serveur
+                    // La requête n'a pas réussi à atteindre le localhost
                     setMessageErreur('');
                 });
                 
                 req.addEventListener("error", function () {
-                    // La requête n'a pas réussi à atteindre le serveur
+                    // La requête n'a pas réussi à atteindre le localhost
                     setMessageErreur('Erreur réseau');
                 });
             })
@@ -324,7 +327,7 @@ export default function GestionFactures(props) {
         document.querySelector('.supp').disabled = true;
 
         const req2 = new XMLHttpRequest();
-        req2.open('GET', `http://serveur/backend-cma/supprimer_facture.php?id=${factureSelectionne[0].id}`);
+        req2.open('GET', `http://localhost/backend-cma/supprimer_facture.php?id=${factureSelectionne[0].id}`);
         req2.addEventListener('load', () => {
             fermerModalConfirmation();
             setSupp(true);
@@ -347,6 +350,7 @@ export default function GestionFactures(props) {
         reinitialsation();
         setfactureSelectionne([]);
         setdetailsFacture([]);
+        setFiltrer(false);
     }
 
     const fermerModalConfirmation = () => {
@@ -417,11 +421,6 @@ export default function GestionFactures(props) {
                 </div>
             </Modal>
             <div className="liste-medoc">
-
-                <p className="search-zone">
-                    <input type="text" placeholder="Nom du patient" onChange={filtrerListe} />
-                </p>
-
                 <p>
                     <label htmlFor="">Du : </label>
                     <input type="date" ref={date_select1} />
@@ -434,7 +433,14 @@ export default function GestionFactures(props) {
                     <button onClick={rechercherHistorique}>rechercher</button>
                 </p>
                 <p>
-                    recette du jour : <strong>{reccetteTotal + ' Fcfa'}</strong>
+                    recette du jour : <strong>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</strong>
+                        {/* <ReactToPrint
+                            trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '30%', cursor: 'pointer', fontSize: 'medium', fontWeight: '600'}}>Imprimer</button>}
+                            content={() => componentRef2.current}
+                        /> */}
+                </p>
+                <p className="search-zone">
+                    <input type="text" placeholder="Nom du patient" onChange={filtrerListe} />
                 </p>
                 <p>
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>
@@ -493,7 +499,7 @@ export default function GestionFactures(props) {
                     <div>
                         <div>Reste à payer <span style={{fontWeight: 700, color: '#0e771a'}}>{factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer + ' Fcfa'}</span></div>
                     </div>
-                    <div style={{display: `${filtrer ? 'none' : 'none'}`}}>
+                    <div style={{display: `${filtrer ? 'none' : 'block'}`}}>
                         <ReactToPrint
                             trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '20%', cursor: 'pointer', fontSize: 'large', fontWeight: '600'}}>Imprimer</button>}
                             content={() => componentRef.current}
@@ -502,7 +508,7 @@ export default function GestionFactures(props) {
                     <div style={{display: `${!filtrer ? 'none' : 'inline'}`}}>
                         <button style={{width: '20%', height: '5vh', marginLeft: '15px', backgroundColor: '#e14046'}} onClick={() => {if(detailsFacture.length > 0 && parseInt(factureSelectionne[0].reste_a_payer) > 0) setModalConfirmation(true)}}>Annuler</button>
                     </div>
-                    <h3 style={{marginTop: 5}}>Régler la facture</h3>
+                    <h3 style={{marginTop: 5, display: `${filtrer ? 'block' : 'none'}`}}>Régler la facture</h3>
                     {filtrer ? (
                         <div style={{marginTop: 13}}>
                             <p>
@@ -521,7 +527,7 @@ export default function GestionFactures(props) {
                             </p>
                         </div>
                     ) : null}
-                    <button onClick={reglerFacture}>Régler</button>
+                    <button style={{display: `${filtrer ? 'inline' : 'none'}`}} onClick={() => {if(filtrer && detailsFacture.length > 0) {reglerFacture()} else {}}}>Régler</button>
                     <div>
                         {factureSelectionne.length > 0 && (
                             <div style={{display: 'none'}}>
@@ -543,6 +549,15 @@ export default function GestionFactures(props) {
                                 />
                             </div>
                         )}
+                        <div style={{display: 'none'}}>
+                            <RecettePharmcie
+                                ref={componentRef2}
+                                recetteTotal={reccetteTotal}
+                                nomConnecte={props.nomConnecte}
+                                dateDepart={dateDepart}
+                                dateFin={dateFin}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

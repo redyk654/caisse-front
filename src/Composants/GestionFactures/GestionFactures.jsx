@@ -78,9 +78,9 @@ export default function GestionFactures(props) {
         setfactureSauvegarde([]);
         const req = new XMLHttpRequest();
         if (filtrer) {
-            req.open('GET', 'http://serveur/backend-cma/gestion_factures.php?filtrer=oui');
+            req.open('GET', 'http://localhost/backend-cma/gestion_factures.php?filtrer=oui');
             const req2 = new XMLHttpRequest();
-            req2.open('GET', 'http://serveur/backend-cma/gestion_factures.php?filtrer=oui&manquant');
+            req2.open('GET', 'http://localhost/backend-cma/gestion_factures.php?filtrer=oui&manquant');
             req2.addEventListener('load', () => {
                 const result = JSON.parse(req2.responseText);
                 setManquantTotal(result[0].manquant);
@@ -88,10 +88,10 @@ export default function GestionFactures(props) {
             req2.send();
 
         } else {
-            req.open('GET', 'http://serveur/backend-cma/gestion_factures.php');
+            req.open('GET', 'http://localhost/backend-cma/gestion_factures.php');
         }
         req.addEventListener("load", () => {
-            if (req.status >= 200 && req.status < 400) { // Le serveur a réussi à traiter la requête
+            if (req.status >= 200 && req.status < 400) { // Le localhost a réussi à traiter la requête
                 const result = JSON.parse(req.responseText);
                 setFactures(result);
                 setfactureSauvegarde(result);
@@ -102,7 +102,7 @@ export default function GestionFactures(props) {
             }
         });
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le serveur
+            // La requête n'a pas réussi à atteindre le localhost
             console.error("Erreur réseau");
         });
 
@@ -113,7 +113,7 @@ export default function GestionFactures(props) {
         if (factureSelectionne.length > 0) {
             const req = new XMLHttpRequest();
     
-            req.open('GET', `http://serveur/backend-cma/gestion_factures.php?id=${factureSelectionne[0].id}`);
+            req.open('GET', `http://localhost/backend-cma/gestion_factures.php?id=${factureSelectionne[0].id}`);
     
             req.addEventListener('load', () => {
                 const result = JSON.parse(req.responseText);
@@ -163,7 +163,7 @@ export default function GestionFactures(props) {
                 data.append('relicat', relicat);
     
                 const req = new XMLHttpRequest();
-                req.open('POST', 'http://serveur/backend-cma/gestion_factures.php')
+                req.open('POST', 'http://localhost/backend-cma/gestion_factures.php')
     
                 req.addEventListener('load', () => {
                     setSupp(false);
@@ -193,7 +193,7 @@ export default function GestionFactures(props) {
         data.append('id', factureSelectionne[0].id);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/supprimer_facture.php');
+        req.open('POST', 'http://localhost/backend-cma/supprimer_facture.php');
         
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {
@@ -358,7 +358,7 @@ export default function GestionFactures(props) {
                         <button style={{width: '20%', height: '5vh', marginLeft: '15px', backgroundColor: '#e14046'}} onClick={() => {if(detailsFacture.length > 0) setModalConfirmation(true)}}>Annuler</button>
                     </div>
                     </div>
-                    <h3 style={{marginTop: 5}}>Régler la facture</h3>
+                    {/* <h3 style={{marginTop: 5}}>Régler la facture</h3>
                     {factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer > 0 ? (
                         <div style={{marginTop: 13}}>
                             <p>
@@ -377,7 +377,7 @@ export default function GestionFactures(props) {
                             </p>
                         </div>
                     ) : null}
-                    <button onClick={reglerFacture}>Régler</button>
+                    <button onClick={reglerFacture}>Régler</button> */}
                     <div>
                         {factureSelectionne.length > 0 && (
                             <div style={{display: 'none'}}>

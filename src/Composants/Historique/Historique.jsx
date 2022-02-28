@@ -29,16 +29,15 @@ export default function Historique(props) {
             let dateF = dateFin;
 
             const req = new XMLHttpRequest();
-            req.open('GET', `http://serveur/backend-cma/recuperer_services_fait.php?dateD=${dateD}&dateF=${dateF}`);
+            req.open('GET', `http://localhost/backend-cma/recuperer_services_fait.php?dateD=${dateD}&dateF=${dateF}`);
 
             req.addEventListener('load', () => {
                 const result = JSON.parse(req.responseText);
-                console.log(req.responseText);
                 sethistorique(result);
                 stopChargement();
 
                 const req2 = new XMLHttpRequest();
-                req2.open('GET', `http://serveur/backend-cma/recuperer_services_fait.php?dateD=${dateD}&dateF=${dateF}&recette=oui`);
+                req2.open('GET', `http://localhost/backend-cma/recuperer_services_fait.php?dateD=${dateD}&dateF=${dateF}&recette=oui`);
                 req2.onload = () => {setRecetteTotal(JSON.parse(req2.responseText)[0].recette);}
                 req2.send();
 

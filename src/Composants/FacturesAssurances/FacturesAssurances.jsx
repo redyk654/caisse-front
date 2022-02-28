@@ -25,7 +25,7 @@ export default function FacturesAssurances() {
     useEffect(() => {
         if(clientSelect.length === 1) {
             const req = new XMLHttpRequest();
-            req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?id_general=${clientSelect[0].id_facture}`);
+            req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?id_general=${clientSelect[0].id_facture}`);
             req.addEventListener('load', () => {
 
                 const result = JSON.parse(req.responseText);
@@ -34,12 +34,24 @@ export default function FacturesAssurances() {
                 let i = 0;
                 result.forEach(item => {
                     const req2 = new XMLHttpRequest();
-                    req2.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item.id_facture}`);
+                    req2.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture=${item.id_facture}`);
             
                     req2.addEventListener('load', () => {
                         i++;
                         result2 = [...result2, ...JSON.parse(req2.responseText)];
                         if (result.length === i) {
+                            result2 = traiterDoublons(result2);
+                            result2.map(item => {
+                                if (item.categorie !== "pharmacie") {
+                                    let des = extraireCode(item.designation);
+    
+                                    Object.defineProperty(item, 'designation', {
+                                        value: des,
+                                        configurable: true,
+                                        enumerable: true,
+                                    });
+                                }
+                            });
                             setInfosClient(result2);
                         }
                     });
@@ -56,7 +68,7 @@ export default function FacturesAssurances() {
     useEffect(() => {
         // Récupération des clients
         const req = new XMLHttpRequest();
-        req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture_fait=oui`);
+        req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture_fait=oui`);
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -66,7 +78,71 @@ export default function FacturesAssurances() {
 
         req.send();
         
-    }, [])
+    }, []);
+
+    const traiterDoublons = (result) => {
+        const des = [];
+        const tab = [];
+        result.forEach(item => {
+            if (des.indexOf(item.designation) === -1) {
+                des.push(item.designation);
+                Object.defineProperty(item, 'prix', {
+                    value: parseInt(item.prix) / parseInt(item.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+                tab.push(item);
+            } else {
+                tab.forEach(item2 => {
+                    if (item.designation === item2.designation) {
+                        if (item2.categorie === "pharmacie") {
+                            Object.defineProperty(item, 'prix', {
+                                value: parseInt(item.prix) / parseInt(item.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                            Object.defineProperty(item2, 'qte', {
+                                value: parseInt(item.qte) + parseInt(item2.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+
+                        } else {
+
+                            Object.defineProperty(item2, 'qte', {
+                                value: parseInt(item.qte) + parseInt(item2.qte),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                            Object.defineProperty(item2, 'prix_total', {
+                                value: parseInt(item.qte) * parseInt(item2.prix),
+                                configurable: true,
+                                enumerable: true,
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        tab.forEach(item3 => {
+            if (item3.categorie === "pharmacie") {
+                Object.defineProperty(item3, 'prix_total', {
+                    value: parseInt(item3.prix) * parseInt(item3.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+            } else {
+                Object.defineProperty(item3, 'prix_total', {
+                    value: parseInt(item3.prix) * parseInt(item3.qte),
+                    configurable: true,
+                    enumerable: true,
+                });
+            }
+        });
+
+        return tab;
+    }
 
     const rechercherClient = () => {
         const data = new FormData();
@@ -74,13 +150,13 @@ export default function FacturesAssurances() {
         data.append('statu', 'done');
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=service');
+        req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=service');
 
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
             const req2 = new XMLHttpRequest();
-            req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
+            req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
                 traiterData(result);
@@ -195,7 +271,8 @@ export default function FacturesAssurances() {
                     <div style={{textAlign: 'center', lineHeight: '28px'}}>
                         <div>Nom : <span style={{fontWeight: '600'}}>{clientSelect[0].nom}</span></div>
                         <div>Couvert par : <span style={{fontWeight: '600'}}>{assurance}</span></div>
-                        <div>Periode du <span style={{fontWeight: '600'}}>{formaterDate(clientSelect[0].periode.substring(3, 13))}</span> au <span style={{fontWeight: '600'}}>{formaterDate(clientSelect[0].periode.substring(17, 27))}</span></div>
+                        <div>Pourcentage : <span style={{fontWeight: '600'}}>{clientSelect[0].type_assurance}</span></div>
+                        <div>Periode <span style={{fontWeight: '600'}}>{clientSelect[0].periode}</span></div>
                         <div>Total : <span style={{fontWeight: '600'}}>{clientSelect[0].total + ' Fcfa'}</span></div>
                         <div>Restant à payer : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
                     </div>
@@ -211,10 +288,10 @@ export default function FacturesAssurances() {
                         </thead>
                         <tbody>
                             {infosClient.map(item => {
-                                if (item.categorie === "service") {
+                                if (item.categorie !== "pharmacie") {
                                     return (
                                         <tr key={item.id} style={{fontWeight: '600'}}>
-                                            <td>{extraireCode(item.designation)}</td>
+                                            <td>{item.designation}</td>
                                             <td>{item.prix + ' Fcfa' }</td>
                                         </tr>
                                     )
@@ -227,8 +304,8 @@ export default function FacturesAssurances() {
                         <thead>
                             <tr>
                                 <td>Designation</td>
-                                <td>Pu</td>
                                 <td>Qte</td>
+                                <td>Pu</td>
                                 <td>Prix total</td>
                             </tr>
                         </thead>
@@ -238,9 +315,9 @@ export default function FacturesAssurances() {
                                     return (
                                         <tr key={item.id} style={{fontWeight: '600'}}>
                                             <td>{item.designation}</td>
-                                            <td>{(parseInt(item.prix) / parseInt(item.qte))}</td>
                                             <td>{item.qte}</td>
-                                            <td>{item.prix + ' Fcfa' }</td>
+                                            <td>{item.prix}</td>
+                                            <td>{item.prix_total + ' Fcfa' }</td>
                                         </tr>
                                     )
                                 }
