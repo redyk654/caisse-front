@@ -56,6 +56,7 @@ export default function GestionFactures(props) {
 
     const componentRef = useRef();
     const componentRef2 = useRef();
+    const btn = useRef();
 
     let date_select1 = useRef();
     let date_select2 = useRef();
@@ -219,8 +220,9 @@ export default function GestionFactures(props) {
 
 
 
-    const reglerFacture = () => {
+    const reglerFacture = (e) => {
         if (parseInt(verse) >= parseInt(factureSelectionne[0].reste_a_payer)) {
+            e.target.disabled = true;
              // Règlement de la facture
 
             const data = new FormData();
@@ -345,6 +347,7 @@ export default function GestionFactures(props) {
     }
 
     const fermerModalReussi = () => {
+        btn.current.disabled = false;
         setModalReussi(false);
         seteffet(!effet);
         reinitialsation();
@@ -527,7 +530,7 @@ export default function GestionFactures(props) {
                             </p>
                         </div>
                     ) : null}
-                    <button style={{display: `${filtrer ? 'inline' : 'none'}`}} onClick={() => {if(filtrer && detailsFacture.length > 0) {reglerFacture()} else {}}}>Régler</button>
+                    <button ref={btn} style={{display: `${filtrer ? 'inline' : 'none'}`}} onClick={(e) => {if(filtrer && detailsFacture.length > 0) {reglerFacture(e)} else {}}}>Régler</button>
                     <div>
                         {factureSelectionne.length > 0 && (
                             <div style={{display: 'none'}}>
