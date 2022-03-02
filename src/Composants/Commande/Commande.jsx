@@ -256,6 +256,13 @@ export default function Commande(props) {
         setListeMedoc(medocFilter);
     }
 
+    const retirerCommande = () => {
+        const tab = medocCommandes;
+        tab.pop();
+        setMedocCommandes([...tab]);
+        
+    }
+
     // Enregistrement d'un médicament dans la commande
     const ajouterMedoc = () => {
         /* 
@@ -272,15 +279,15 @@ export default function Commande(props) {
             
             medocSelect[0].reduction = false;
 
-            const existe = medocCommandes.filter(item => (medocSelect[0].id == item.id));
+            // const existe = medocCommandes.filter(item => (medocSelect[0].id == item.id));
 
-            if (existe.length > 0) {
-                setMessageErreur('Cet acte est déjà dans la facture');
-            } else {
+            // if (existe.length > 0) {
+            //     setMessageErreur('Cet acte est déjà dans la facture');
+            // } else {
                 setMessageErreur('');
                 setMedocCommandes([...medocCommandes, medocSelect[0]]);
                 // setMedoSelect(false);
-            }
+            // }
 
             document.getElementById('recherche').value = "";
             document.getElementById('recherche').focus();
@@ -854,7 +861,7 @@ export default function Commande(props) {
                         </thead>
                         <tbody>
                             {medocCommandes.map(item => (
-                                <tr key={item.id}>
+                                <tr style={{cursor: 'pointer'}} onClick={retirerCommande}>
                                     <td>{extraireCode(item.designation)}</td>
                                     <td>{item.prix + ' Fcfa' }</td>
                                 </tr>
