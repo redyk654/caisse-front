@@ -88,6 +88,8 @@ export default function GestionFactures(props) {
         setdetailsFacture([]);
         reinitialsation();
         setfactureSelectionne([]);
+        document.querySelector('.recherche-patient').value = '';
+        
         const req = new XMLHttpRequest();
         if (filtrer) {
             req.open('GET', `http://localhost/backend-cma/factures_pharmacie.php?filtrer=oui&caissier=${props.nomConnecte}`);
@@ -319,8 +321,23 @@ export default function GestionFactures(props) {
      }
 
     const filtrerListe = (e) => {
-        // const medocFilter = factureSauvegarde.filter(item => (item.id.indexOf(e.target.value) !== -1));
-        setFactures(factureSauvegarde.filter(item => (item.patient.toLowerCase().indexOf(e.target.value.trim().toLowerCase()) !== -1)));
+        
+        const req = new XMLHttpRequest();
+
+        if (filtrer) {
+            req.open('GET', `http://localhost/backend-cma/rechercher_facture_phar.php?str=${e.target.value}&caissier=${props.nomConnecte}`);
+        } else {
+            req.open('GET', `http://localhost/backend-cma/rechercher_facture_phar.php?str=${e.target.value}`);
+        }
+
+        req.addEventListener('load', () => {
+            if (req.status >= 200 && req.status < 400) {
+                const result = JSON.parse(req.responseText);
+                setFactures(result);
+            }
+        });
+
+        req.send();
     }
 
     const supprimerFacture = () => {
@@ -348,6 +365,7 @@ export default function GestionFactures(props) {
 
     const fermerModalReussi = () => {
         btn.current.disabled = false;
+        document.querySelector('.recherche-patient').value = '';
         setModalReussi(false);
         seteffet(!effet);
         reinitialsation();
@@ -443,7 +461,7 @@ export default function GestionFactures(props) {
                         /> */}
                 </p>
                 <p className="search-zone">
-                    <input type="text" placeholder="Nom du patient" onChange={filtrerListe} />
+                    <input type="text" placeholder="Nom du patient" className="recherche-patient" onChange={filtrerListe} />
                 </p>
                 <p>
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>

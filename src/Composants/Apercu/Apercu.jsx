@@ -42,7 +42,6 @@ export default function Apercu(props) {
 
         if (dateDepart.length > 0 && dateFin.length > 0) {
             
-            console.log(dateDepart, dateFin);
             startChargement();
     
             let dateD = dateDepart;
@@ -107,6 +106,7 @@ export default function Apercu(props) {
             if(req.status >= 200 && req.status < 400) {
                 setMessageErreur('');
                 let result = JSON.parse(req.responseText);
+                console.log(result);
 
                 if (props.role === "caissier") {
                     result = result.filter(item => (item.caissier === props.nomConnecte));
@@ -114,21 +114,24 @@ export default function Apercu(props) {
                     result = result.filter(item => (item.caissier === caissier));
                 }
                 
-                let recette = 0;
+                let recette = 0, frais = 0;
                 if (assurance === "non") {
                     result.forEach(item => {
                         if (item.assurance === "aucune") {
                             recette += parseInt(item.a_payer);
+                            frais += parseInt(item.frais);
                         }
                     });
                 } else {
                     result.forEach(item => {
                         if (item.assurance !== "aucune") {
                             recette += parseInt(item.a_payer);
+                            frais += parseInt(item.frais);
                         }
                     });
                 }
                 setRecetteTotal(recette);
+                setMontantFrais(frais);
             }
         });
 
@@ -268,6 +271,7 @@ export default function Apercu(props) {
                         </div>
                         <button onClick={rechercherHistorique}>rechercher</button>
                         <div>Recette : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Matériel : <span style={{fontWeight: '700'}}>{montantFrais ? montantFrais + ' Fcfa' : '0 Fcfa'}</span></div>
                         <div style={{display: 'none',}}>
                             <div style={{width: '50%'}}>Laboratoire : <span style={{fontWeight: '700'}}>{reccetteTotal ? labo + ' Fcfa' : '0 Fcfa'}</span></div>
                             <div style={{width: '50%'}}>Radiologie : <span style={{fontWeight: '700'}}>{reccetteTotal ? radio + ' Fcfa' : '0 Fcfa'}</span></div>
@@ -311,6 +315,7 @@ export default function Apercu(props) {
                     ref={componentRef}
                     historique={historique}
                     recetteTotal={reccetteTotal}
+                    montantFrais={montantFrais}
                     nomConnecte={props.nomConnecte}
                     dateDepart={dateDepart}
                     dateFin={dateFin}

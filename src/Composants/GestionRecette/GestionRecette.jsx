@@ -137,11 +137,13 @@ export default function GestionRecette(props) {
                 let result = JSON.parse(req.responseText);
                 result = result.filter(item => (item.caissier === caissier));
                 
-                let recette = 0;
+                let recette = 0, f = 0;
                 result.forEach(item => {
                     recette += parseInt(item.a_payer);
+                    f += parseInt(item.frais);
                 });
                 setRecetteTotal(recette);
+                setFrais(f);
             }
         });
         req.send(data);
@@ -472,7 +474,10 @@ export default function GestionRecette(props) {
                             </button>
                         </div>
                         <div>
-                            Recette : <span style={{fontWeight: '600'}}>{recetteTotal + ' Fcfa'}</span>
+                            Recette : <span style={{fontWeight: '600'}}>{recetteTotal ? recetteTotal + ' Fcfa' : '0 Fcfa'}</span>
+                        </div>
+                        <div>
+                            Matériel : <span style={{fontWeight: '600'}}>{frais ? frais + ' Fcfa' : '0 Fcfa'}</span>
                         </div>
                     </div>
                     <div className="btn-valid-annul" style={{textAlign: 'center', marginTop: '10px',}}>

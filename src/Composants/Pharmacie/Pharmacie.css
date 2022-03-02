@@ -44,7 +44,7 @@
 
 
 .container-facture .liste-medoc ul{
-    height: 60vh;
+    height: 50vh;
     border: 1px solid gray;
     overflow: auto;
     position: relative;

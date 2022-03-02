@@ -182,7 +182,7 @@ export default function GestionFactures(props) {
      }
 
     const filtrerListe = (e) => {
-        setFactures(factureSauvegarde.filter(item => (item.id.indexOf(e.target.value.trim()) !== -1)));
+        setFactures(factureSauvegarde.filter(item => (item.patient.indexOf(e.target.value.trim()) !== -1)));
     }
 
     const supprimerFacture = () => {
@@ -295,10 +295,10 @@ export default function GestionFactures(props) {
                 <p className="search-zone">
                     <input type="text" placeholder="N° facture" onChange={filtrerListe} />
                 </p>
-                <p>
+                {/* <p>
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>
                     <input type="checkbox" name="non_regle" id="non_regle" checked={filtrer} onChange={() => setFiltrer(!filtrer)} />
-                </p>
+                </p> */}
                 {/* <div>
                     {filtrer ? (
                         <div>Total non réglés: <span style={{fontWeight: 700}}>{manquantTotal == null ? '0 Fcfa' : manquantTotal + ' Fcfa'}</span></div>
@@ -307,7 +307,7 @@ export default function GestionFactures(props) {
                 <h3>{filtrer ? 'Factures non réglés' : 'Factures'}</h3>
                 <ul>
                     {factures.length > 0 ? factures.map(item => (
-                        <li id={item.id} key={item.id} onClick={afficherInfos} style={{color: `${parseInt(item.en_stock) < parseInt(item.min_rec) ? 'red' : ''}`}}>{item.id}</li>
+                        <li id={item.id} key={item.id} onClick={afficherInfos}>{item.patient}</li>
                     )) : null}
                 </ul>
             </div>
@@ -348,7 +348,7 @@ export default function GestionFactures(props) {
                         <div>Reste à payer <span style={{fontWeight: 700, color: '#0e771a'}}>{factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer + ' Fcfa'}</span></div>
                     </div>
                     <div>                        
-                    <div style={{display: `${filtrer ? 'none' : 'inline'}`}}>
+                    <div style={{display: `${filtrer ? 'none' : 'none'}`}}>
                         <ReactToPrint
                             trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '20%', cursor: 'pointer', fontSize: 'large', fontWeight: '600'}}>Imprimer</button>}
                             content={() => componentRef.current}

@@ -153,6 +153,7 @@ export default class ImprimerHistorique extends Component {
                             </table>
                         </div>
                         <div style={{marginTop: 5}}>Recette : <strong>{this.props.recetteTotal ? this.props.recetteTotal + ' Fcfa' : 0 + ' Fcfa'}</strong></div>
+                        <div style={{marginTop: 5}}>Matériel : <strong>{this.props.montantFrais ? this.props.montantFrais + ' Fcfa' : 0 + ' Fcfa'}</strong></div>
                     </div>
                 </div>
             </div>    

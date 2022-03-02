@@ -215,18 +215,6 @@ export default function Commande(props) {
 
     }, [medocCommandes, frais]);
 
-    // useEffect(() => {
-    //     // Etat d'urgence entre 17h et 8h
-    //     const d = new Date();
-
-    //     if ( d.getHours() >= 17 || d.getHours() <= 7 || (d.getDay() === 0 || d.getDay() === 6) ) {
-    //         setUrgence(true);
-    //     } else {
-    //         setUrgence(false);
-    //     }
-
-    // }, [actualiserQte]);
-
     useEffect(() => {
         // Pour mettre à jour le relicat et le reste à payer
         if (montantVerse >= parseInt(qtePrixTotal.a_payer)) {
@@ -699,7 +687,21 @@ export default function Commande(props) {
     const filtrerPatient = (e) => {
         setpatient(e.target.value);
 
-        setlistePatient(listePatientSauvegarde.filter(item => (item.nom.toLowerCase().indexOf(e.target.value.trim().toLowerCase()) !== -1)))
+        const req = new XMLHttpRequest();
+
+        req.open('GET', `http://localhost/backend-cma/rechercher_patient.php?str=${e.target.value}`);
+
+        req.addEventListener('load', () => {
+            if (req.status >= 200 && req.status < 400) {
+                const result = JSON.parse(req.responseText);
+
+                setlistePatient(result);
+                setlistePatientSauvegarde(result);
+            }
+            
+        });
+
+        req.send();
     }
 
     const extraireCode = (designation) => {
