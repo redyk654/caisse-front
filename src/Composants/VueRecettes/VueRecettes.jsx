@@ -14,7 +14,7 @@ export default function VueRecettes(props) {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/gestion_pourcentage.php?recuperer');
+        req.open('GET', 'http://serveur/backend-cma/gestion_pourcentage.php?recuperer');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -36,7 +36,7 @@ export default function VueRecettes(props) {
         setInfoRecette(listeRecettesSauvegarde.filter(item => (item.id_recette.indexOf(e.target.id) !== -1)));
         // console.log(listeRecettesSauvegarde.filter(item => (item.id_recette.indexOf(e.target.id) !== -1)));
         const req = new XMLHttpRequest();
-        req.open('GET', `http://localhost/backend-cma/gestion_pourcentage.php?id_recette=${e.target.id}`);
+        req.open('GET', `http://serveur/backend-cma/gestion_pourcentage.php?id_recette=${e.target.id}`);
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {

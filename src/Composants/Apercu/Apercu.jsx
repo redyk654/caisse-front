@@ -21,6 +21,7 @@ export default function Apercu(props) {
     const [historique, sethistorique] = useState([]);
     const [listeComptes, setListeComptes] = useState([]);
     const [dateJour, setdateJour] = useState('');
+    const [total, setTotal] = useState('');
     const [reccetteTotal, setRecetteTotal] = useState(false);
     const [montantFrais, setMontantFrais] = useState(0);
     const [dateDepart, setdateDepart] = useState('');
@@ -55,18 +56,26 @@ export default function Apercu(props) {
     
             const req = new XMLHttpRequest();
     
-            req.open('POST', `http://localhost/backend-cma/apercu.php`);
+            req.open('POST', `http://serveur/backend-cma/apercu.php`);
     
             req.addEventListener('load', () => {
                 setMessageErreur('');
                 recupererRecetteTotal(data);
                 const result = JSON.parse(req.responseText);
                 sethistorique(result);
+
+                let t = 0;
+                result.forEach(item => {
+                    t += parseInt(item.prix_total);
+                })
+
+                setTotal(t);
+
                 stopChargement();
             });
     
             req.addEventListener("error", function () {
-                // La requête n'a pas réussi à atteindre le localhost
+                // La requête n'a pas réussi à atteindre le serveur
                 setMessageErreur('Erreur réseau');
             });
     
@@ -79,7 +88,7 @@ export default function Apercu(props) {
         // Récupération des comptes
 
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/recuperer_caissier.php');
+        req.open('GET', 'http://serveur/backend-cma/recuperer_caissier.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -91,7 +100,7 @@ export default function Apercu(props) {
         });
 
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le localhost
+            // La requête n'a pas réussi à atteindre le serveur
             setMessageErreur('Erreur réseau');
         });
 
@@ -100,13 +109,12 @@ export default function Apercu(props) {
 
     const recupererRecetteTotal = (data) => {
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/recuperer_recette.php');
+        req.open('POST', 'http://serveur/backend-cma/recuperer_recette.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
                 setMessageErreur('');
                 let result = JSON.parse(req.responseText);
-                console.log(result);
 
                 if (props.role === "caissier") {
                     result = result.filter(item => (item.caissier === props.nomConnecte));
@@ -136,7 +144,7 @@ export default function Apercu(props) {
         });
 
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le localhost
+            // La requête n'a pas réussi à atteindre le serveur
             setMessageErreur('Erreur réseau');
         });
 
@@ -161,7 +169,7 @@ export default function Apercu(props) {
 
         const req = new XMLHttpRequest();
         // Récupération des frais matériel
-        req.open('POST', `http://localhost/backend-cma/frais.php`);
+        req.open('POST', `http://serveur/backend-cma/frais.php`);
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -172,7 +180,7 @@ export default function Apercu(props) {
         });
 
         req.addEventListener("error", function () {
-            // La requête n'a pas réussi à atteindre le localhost
+            // La requête n'a pas réussi à atteindre le serveur
             setMessageErreur('Erreur réseau');
         });
 
@@ -270,8 +278,9 @@ export default function Apercu(props) {
                             </p>
                         </div>
                         <button onClick={rechercherHistorique}>rechercher</button>
-                        <div>Recette : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Total : <span style={{fontWeight: '700'}}>{total ? (total + montantFrais) + ' Fcfa' : '0 Fcfa'}</span></div>
                         <div>Matériel : <span style={{fontWeight: '700'}}>{montantFrais ? montantFrais + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Recette : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
                         <div style={{display: 'none',}}>
                             <div style={{width: '50%'}}>Laboratoire : <span style={{fontWeight: '700'}}>{reccetteTotal ? labo + ' Fcfa' : '0 Fcfa'}</span></div>
                             <div style={{width: '50%'}}>Radiologie : <span style={{fontWeight: '700'}}>{reccetteTotal ? radio + ' Fcfa' : '0 Fcfa'}</span></div>
@@ -315,6 +324,8 @@ export default function Apercu(props) {
                     ref={componentRef}
                     historique={historique}
                     recetteTotal={reccetteTotal}
+                    listing={assurance}
+                    total={total}
                     montantFrais={montantFrais}
                     nomConnecte={props.nomConnecte}
                     dateDepart={dateDepart}

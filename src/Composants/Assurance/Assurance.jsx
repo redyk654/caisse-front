@@ -89,11 +89,10 @@ export default function Assurance() {
 
             clientSelect[0].factures.map(item => {
                 const req = new XMLHttpRequest();
-                req.open('GET', `http://localhost/backend-cma/gestion_assurance.php?facture=${item}`);
+                req.open('GET', `http://serveur/backend-cma/gestion_assurance.php?facture=${item}`);
                 req.addEventListener('load', () => {
                     i++;
                     result = [...result, ...JSON.parse(req.responseText)];
-                    console.log(result);
 
 
                     if (clientSelect[0].factures.length === i) {
@@ -126,7 +125,7 @@ export default function Assurance() {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/gestion_patients.php');
+        req.open('GET', 'http://serveur/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -139,7 +138,7 @@ export default function Assurance() {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/assurances.php?liste');
+        req.open('GET', 'http://serveur/backend-cma/assurances.php?liste');
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -238,17 +237,16 @@ export default function Assurance() {
         data.append('assurance', assurance);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=service');
+        req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=service');
 
         req.addEventListener('load', () => {
             let result = [...JSON.parse(req.responseText)];
 
 
             const req2 = new XMLHttpRequest();
-            req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php?categorie=pharmacie');
+            req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php?categorie=pharmacie');
             req2.addEventListener('load', () => {
                 result = [...result, ...JSON.parse(req2.responseText)];
-                console.log(result);
 
                 traiterData(result);
                 traiterDateConsommation(result);
@@ -306,7 +304,9 @@ export default function Assurance() {
 
     const traiterData = (result) => {
         const clients = [];
-        const listeProvisoiresClient = []
+        const listeProvisoiresClient = [];
+        console.log(result);
+
         result.forEach(item => {
             if (clients.indexOf(item.patient) === -1) {
                 clients.push(item.patient);
@@ -314,13 +314,17 @@ export default function Assurance() {
             } else {
                 listeProvisoiresClient.forEach(item2 => {
                     if (item.patient === item2.nom){
+                        console.log(item.frais);
                         item2.factures.push(item.id);
-                        item.frais += parseInt(item.frais);
+                        if (item.frais) {
+                            item2.frais += parseInt(item.frais);
+                        }
                         item2.total += parseInt(item.prix_total);
                     }
                 })
             }
         });
+
 
         setListeClients(listeProvisoiresClient);
         setListeClientsSauvegarde(listeProvisoiresClient);
@@ -346,7 +350,7 @@ export default function Assurance() {
             data.append('categorie', 'service');
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -358,7 +362,7 @@ export default function Assurance() {
                         data.append('categorie', 'pharmacie');
 
                         const req2 = new XMLHttpRequest();
-                        req2.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
+                        req2.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
 
                         req2.addEventListener('load', () => {
                             i++;
@@ -395,7 +399,7 @@ export default function Assurance() {
             data.append('reste', reste);
     
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
     
             req.addEventListener('load', () => {
                 enregistrerIdFactures(id);
@@ -414,7 +418,7 @@ export default function Assurance() {
             data.append('id_general', id);
 
             const req = new XMLHttpRequest();
-            req.open('POST', 'http://localhost/backend-cma/gestion_assurance.php');
+            req.open('POST', 'http://serveur/backend-cma/gestion_assurance.php');
 
             req.addEventListener('load', () => {
                 i++;
@@ -435,7 +439,7 @@ export default function Assurance() {
         data.append('type_assurance', typeAssurance);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/gestion_patients.php');
+        req.open('POST', 'http://serveur/backend-cma/gestion_patients.php');
 
         req.addEventListener('load', () => {
             setModalPatient(false);
@@ -450,7 +454,7 @@ export default function Assurance() {
         data.append('designation', nvAssurance);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/assurances.php');
+        req.open('POST', 'http://serveur/backend-cma/assurances.php');
 
         req.addEventListener('load', () => {
             setFetch(!fecth);
@@ -517,7 +521,7 @@ export default function Assurance() {
         data.append('supprime', assuranceSelect);
         
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/assurances.php');
+        req.open('POST', 'http://serveur/backend-cma/assurances.php');
 
         req.addEventListener('load', () => {
             setFetch(!fecth);

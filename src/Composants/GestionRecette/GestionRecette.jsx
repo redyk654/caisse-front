@@ -60,6 +60,7 @@ export default function GestionRecette(props) {
     const [listeComptes, setListeComptes] = useState([]);
     const [dateJour, setdateJour] = useState('');
     const [recetteTotal, setRecetteTotal] = useState(0);
+    const [total, setTotal] = useState('');
     const [dateDepart, setdateDepart] = useState('');
     const [dateFin, setdateFin] = useState('');
     const [services, setServices] = useState([]);
@@ -84,7 +85,7 @@ export default function GestionRecette(props) {
 
     useEffect(() => {
         const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost/backend-cma/recuperer_caissier.php');
+        req.open('GET', 'http://serveur/backend-cma/recuperer_caissier.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -110,13 +111,19 @@ export default function GestionRecette(props) {
             data.append('caissier', caissier);
     
             const req = new XMLHttpRequest();
-            req.open('POST', `http://localhost/backend-cma/gestion_pourcentage.php`);
+            req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php`);
     
             req.addEventListener('load', () => {
                 fetchDetails();
                 recupererRecetteTotal(data);
                 const result = JSON.parse(req.responseText);
                 sethistorique(result);
+                let t = 0;
+                result.forEach(item => {
+                    t += parseInt(item.recette);
+                })
+
+                setTotal(t);
             });
     
             req.send(data);
@@ -130,7 +137,7 @@ export default function GestionRecette(props) {
 
     const recupererRecetteTotal = (data) => {
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/recuperer_recette.php');
+        req.open('POST', 'http://serveur/backend-cma/recuperer_recette.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -160,7 +167,7 @@ export default function GestionRecette(props) {
         data.append('caissier', caissier);
 
         const req = new XMLHttpRequest();
-        req.open('POST', `http://localhost/backend-cma/gestion_pourcentage.php?details=oui`);
+        req.open('POST', `http://serveur/backend-cma/gestion_pourcentage.php?details=oui`);
 
         req.addEventListener('load', () => {
             const result = JSON.parse(req.responseText);
@@ -296,7 +303,7 @@ export default function GestionRecette(props) {
     //         data.append('recette_restante', item.recetteRestante);
 
     //         const req = new XMLHttpRequest();
-    //         req.open('POST', 'http://localhost/backend-cma/gestion_pourcentage.php');
+    //         req.open('POST', 'http://serveur/backend-cma/gestion_pourcentage.php');
 
     //         req.addEventListener('load', () => {
     //             i++
@@ -322,7 +329,7 @@ export default function GestionRecette(props) {
         data.append('regisseur', props.nomConnecte);
 
         const req = new XMLHttpRequest();
-        req.open('POST', 'http://localhost/backend-cma/gestion_pourcentage.php');
+        req.open('POST', 'http://serveur/backend-cma/gestion_pourcentage.php');
 
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
@@ -474,10 +481,13 @@ export default function GestionRecette(props) {
                             </button>
                         </div>
                         <div>
-                            Recette : <span style={{fontWeight: '600'}}>{recetteTotal ? recetteTotal + ' Fcfa' : '0 Fcfa'}</span>
+                            Total : <span style={{fontWeight: '600'}}>{total ? (total + frais) + ' Fcfa' : '0 Fcfa'}</span>
                         </div>
                         <div>
                             Matériel : <span style={{fontWeight: '600'}}>{frais ? frais + ' Fcfa' : '0 Fcfa'}</span>
+                        </div>
+                        <div>
+                            Recette : <span style={{fontWeight: '600'}}>{recetteTotal ? recetteTotal + ' Fcfa' : '0 Fcfa'}</span>
                         </div>
                     </div>
                     <div className="btn-valid-annul" style={{textAlign: 'center', marginTop: '10px',}}>
