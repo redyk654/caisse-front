@@ -27,13 +27,21 @@ function App() {
   const [nomConnecte, setNomConnecte] = useState('');
   const [role, setRole] = useState('');
 
+  const date_e = new Date('2022-08-19');
+  const date_j = new Date();
+
   useEffect(() => {
+
+    if (date_j.getTime() >= date_e.getTime()) {
+      setConnecter(false);
+    }
+
     if(role === role3) {
       setOnglet(5);
     } else if (role === role1) {
       setOnglet(3);
     } else if (role === role4) {
-      setOnglet(9)
+      setOnglet(9);
     } else {
       setOnglet(1);
     }
@@ -76,7 +84,7 @@ function App() {
       break;
   }
 
-  if (connecter) {
+  if (connecter && date_j.getTime() < date_e.getTime()) {
     if(role === role1) {
       return (
         <main className='app'>
