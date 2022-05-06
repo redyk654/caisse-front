@@ -2,6 +2,9 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import './Historique.css';
 import { ContextChargement } from '../../Context/Chargement';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import ReactToPrint from 'react-to-print';
+import RecetteG from '../ImprimerRecette/RecetteG';
+
 
 export default function Historique(props) {
 
@@ -10,12 +13,13 @@ export default function Historique(props) {
     let date_select2 = useRef();
     let heure_select1 = useRef();
     let heure_select2 = useRef();
+    const componentRef = useRef();
 
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);
 
     const [historique, sethistorique] = useState([])
     const [dateJour, setdateJour] = useState('');
-    const [reccetteTotal, setRecetteTotal] = useState(false);
+    const [recetteTotal, setRecetteTotal] = useState(false);
     const [dateRecherche, setdateRecherche] = useState('');
     const [dateDepart, setdateDepart] = useState('');
     const [dateFin, setdateFin] = useState('');
@@ -118,7 +122,7 @@ export default function Historique(props) {
                                 <input type="time" ref={heure_select2} />
                             </p>
                         <button onClick={rechercherHistorique}>rechercher</button>
-                        <div>Recette total : <span style={{fontWeight: '700'}}>{reccetteTotal ? reccetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
+                        <div>Recette total : <span style={{fontWeight: '700'}}>{recetteTotal ? recetteTotal + ' Fcfa' : '0 Fcfa'}</span></div>
                     </div>
                     <table>
                         <thead>
@@ -147,6 +151,20 @@ export default function Historique(props) {
                         </tbody>
                     </table>
                 </div>
+                <div style={{textAlign: 'center'}}>
+                    <ReactToPrint
+                        trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '20%', cursor: 'pointer', fontSize: 'large', fontWeight: '600'}}>Imprimer</button>}
+                        content={() => componentRef.current}
+                    />
+                </div>
+            </div>
+            <div style={{display: 'none'}}>
+                <RecetteG
+                    ref={componentRef}
+                    dateDepart={dateDepart}
+                    dateFin={dateFin}
+                    recetteTotal={recetteTotal}
+                />
             </div>
         </section>
     )
