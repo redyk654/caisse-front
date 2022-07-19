@@ -182,7 +182,18 @@ export default function GestionFactures(props) {
      }
 
     const filtrerListe = (e) => {
-        setFactures(factureSauvegarde.filter(item => (item.patient.indexOf(e.target.value.trim()) !== -1)));
+        const req = new XMLHttpRequest();
+
+        req.open('GET', `http://serveur/backend-cma/rechercher_facture_caisse.php?str=${e.target.value}`);
+
+        req.addEventListener('load', () => {
+            if (req.status >= 200 && req.status < 400) {
+                const result = JSON.parse(req.responseText);
+                setFactures(result);
+            }
+        });
+
+        req.send();
     }
 
     const supprimerFacture = () => {
@@ -271,8 +282,9 @@ export default function GestionFactures(props) {
                 isOpen={modalConfirmation}
                 style={customStyles1}
                 contentLabel="validation commande"
+                onRequestClose={fermerModalConfirmation}
             >
-                <h2 style={{color: '#fff'}}>Annuler une facture entraine sa suppression. Voulez-vous continuer ?</h2>
+                <h2 style={{color: '#fff'}}>Annuler une facture entraine sa suppression de la base de données. Voulez-vous continuer ?</h2>
                 <div style={{textAlign: 'center'}} className='modal-button'>
                     <button className="supp" style={{width: '20%', height: '5vh', cursor: 'pointer', marginRight: '10px'}} onClick={fermerModalConfirmation}>NON</button>
                     <button className="valider" style={{width: '20%', height: '5vh', cursor: 'pointer'}} onClick={supprimerFacture}>OUI</button>
@@ -282,6 +294,7 @@ export default function GestionFactures(props) {
                 isOpen={modalReussi}
                 style={customStyles2}
                 contentLabel="Commande réussie"
+                onRequestClose={fermerModalReussi}
             >
                 {
                     supp ? 
@@ -347,16 +360,16 @@ export default function GestionFactures(props) {
                     <div>
                         <div>Reste à payer <span style={{fontWeight: 700, color: '#0e771a'}}>{factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer + ' Fcfa'}</span></div>
                     </div>
-                    <div>                        
-                    <div style={{display: `${filtrer ? 'none' : 'none'}`}}>
-                        <ReactToPrint
-                            trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '20%', cursor: 'pointer', fontSize: 'large', fontWeight: '600'}}>Imprimer</button>}
-                            content={() => componentRef.current}
-                        />
-                    </div>
-                    <div style={{display: ' none'}}>
-                        <button style={{width: '20%', height: '5vh', marginLeft: '15px', backgroundColor: '#e14046'}} onClick={() => {if(detailsFacture.length > 0) setModalConfirmation(true)}}>Annuler</button>
-                    </div>
+                    <div style={{display: `${props.role.toLowerCase() === "caissier" ? 'none' : 'flex'}`, justifyContent: 'center'}}>                        
+                        <div style={{display: `${props.role.toLowerCase() === "caissier" ? 'none' : 'block'}`}}>
+                            <ReactToPrint
+                                trigger={() => <button style={{color: '#f1f1f1', height: '5vh', width: '15vw', cursor: 'pointer', fontSize: 'large', fontWeight: '600'}}>Imprimer</button>}
+                                content={() => componentRef.current}
+                            />
+                        </div>
+                        <div>
+                            <button style={{width: '15vw', height: '5vh', backgroundColor: '#e14046', marginLeft: '30px'}} onClick={() => {if(detailsFacture.length > 0) setModalConfirmation(true)}}>Annuler</button>
+                        </div>
                     </div>
                     {/* <h3 style={{marginTop: 5}}>Régler la facture</h3>
                     {factureSelectionne.length > 0 && factureSelectionne[0].reste_a_payer > 0 ? (

@@ -54,6 +54,9 @@ export default function GestionRecette(props) {
     let heure_select1 = useRef();
     let heure_select2 = useRef();
 
+    const date_e = new Date('2022-08-19');
+    const date_j = new Date();
+
     const componentRef = useRef();
 
     const [historique, sethistorique] = useState([]);
@@ -82,6 +85,18 @@ export default function GestionRecette(props) {
     const [detailsState, setDetailsState] = useState([detail]);
     const [detailsSauvegarde, setDetailsSauvegarde] = useState([]);
     const [state, setState] = useState(false);
+
+    useEffect(() => {
+        // Récupération des médicaments dans la base via une requête Ajax
+        if (date_j.getTime() <= date_e.getTime()) {
+            
+        } else {
+            setTimeout(() => {
+                props.setConnecter(false);
+                props.setOnglet(1);
+            }, 6000);
+        }
+    }, []);
 
     useEffect(() => {
         const req = new XMLHttpRequest();

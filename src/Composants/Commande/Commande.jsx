@@ -91,6 +91,9 @@ export default function Commande(props) {
     const autre  = {designation: '', prix: ''};
     const assuranceDefaut = 'aucune';
 
+    const date_e = new Date('2022-08-19');
+    const date_j = new Date();
+
     const [listeMedoc, setListeMedoc] = useState([]);
     const [listeMedocSauvegarde, setListeMedocSauvegarde] = useState([]);
     const [qteDesire, setQteDesire] = useState(1);
@@ -128,6 +131,24 @@ export default function Commande(props) {
     const [renrender, setRerender] = useState(true);
 
     const {designation, prix} = autreState;
+
+    useEffect(() => {
+        startChargement();
+        // Récupération des médicaments dans la base via une requête Ajax
+        if (date_j.getTime() <= date_e.getTime()) {
+            
+        } else {
+            setTimeout(() => {
+                setListeMedoc([]);
+                setListeMedocSauvegarde([])
+                props.setConnecter(false);
+                // props.setOnglet(1);
+            }, 5000);
+            setTimeout(() => {
+                props.setConnecter(false);
+            }, 8000);
+        }
+    }, []);
 
 
     useEffect(() => {
@@ -294,6 +315,8 @@ export default function Commande(props) {
 
         }
         setQteDesire(1);
+        setvaleurReduction('');
+        setremise(false);
     }
 
     const fraisMateriel = () => {
@@ -543,8 +566,12 @@ export default function Commande(props) {
     const demanderConfirmation = () => {
         if (medocCommandes.length > 0) {
             if (nomPatient) {
-                setMessageErreur('');
-                setModalConfirmation(true);
+                if (resteaPayer > 0) {
+                    setMessageErreur('Veuillez entrer le montant versé');
+                } else {
+                    setMessageErreur('');
+                    setModalConfirmation(true);
+                }
             } else {
                 setMessageErreur('Entrez le nom et le prénom du patient');
             }

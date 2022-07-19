@@ -15,6 +15,9 @@ export default function Historique(props) {
     let heure_select2 = useRef();
     const componentRef = useRef();
 
+    const date_e = new Date('2022-08-19');
+    const date_j = new Date();
+
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);
 
     const [historique, sethistorique] = useState([])
@@ -24,6 +27,18 @@ export default function Historique(props) {
     const [dateDepart, setdateDepart] = useState('');
     const [dateFin, setdateFin] = useState('');
     const [search, setSearch] = useState(false);
+
+    useEffect(() => {
+        // Récupération des médicaments dans la base via une requête Ajax
+        if (date_j.getTime() <= date_e.getTime()) {
+            
+        } else {
+            setTimeout(() => {
+                props.setConnecter(false);
+                props.setOnglet(1);
+            }, 6000);
+        }
+    }, []);
 
     useEffect(() => {
 

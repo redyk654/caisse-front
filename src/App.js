@@ -27,14 +27,14 @@ function App() {
   const [nomConnecte, setNomConnecte] = useState('');
   const [role, setRole] = useState('');
 
-  const date_e = new Date('2022-08-19');
+  const date_e = new Date('2022-08-26');
   const date_j = new Date();
 
   useEffect(() => {
 
-    if (date_j.getTime() >= date_e.getTime()) {
-      setConnecter(false);
-    }
+    // if (date_j.getTime() >= date_e.getTime()) {
+    //   setConnecter(false);
+    // }
 
     if(role === role3) {
       setOnglet(5);
@@ -50,19 +50,19 @@ function App() {
   let contenu;
   switch(onglet) {
     case 1:
-      contenu = <Commande nomConnecte={nomConnecte} />
+      contenu = <Commande nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} />
       break;
     case 2:
-      contenu = <GestionFactures nomConnecte={nomConnecte} />;
+      contenu = <GestionFactures nomConnecte={nomConnecte} role={role} />;
       break;
     case 3:
-      contenu = <Historique nomConnecte={nomConnecte} />
+      contenu = <Historique nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} />
       break;
     case 4:
       contenu = <Comptes nomConnecte={nomConnecte} />
       break;
     case 5:
-      contenu = <GestionRecette nomConnecte={nomConnecte} />
+      contenu = <GestionRecette nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} />
       break;
     case 6:
       contenu = <VueRecettes nomConnecte={nomConnecte} role={role} />
@@ -84,18 +84,19 @@ function App() {
       break;
   }
 
-  if (connecter && date_j.getTime() < date_e.getTime()) {
+  if (connecter) {
     if(role === role1) {
       return (
         <main className='app'>
           <Entete nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} role={role} />
           <section className="conteneur-onglets">
-            <div className="onglets-blocs" style={{width: '70%'}}>
+            <div className="onglets-blocs" style={{width: '80%'}}>
               <div className={`tab ${onglet === 3 ? 'active' : ''}`} onClick={ () => {setOnglet(3)}}>Historique</div>
               <div className={`tab ${onglet === 8 ? 'active' : ''}`} onClick={ () => {setOnglet(8)}}>Aperçu</div>
               <div className={`tab ${onglet === 5 ? 'active' : ''}`} onClick={ () => {setOnglet(5)}}>Les états</div>
               <div className={`tab ${onglet === 11 ? 'active' : ''}`} onClick={ () => {setOnglet(11)}}>Modifier</div>
               <div className={`tab ${onglet === 4 ? 'active' : ''}`} onClick={ () => {setOnglet(4)}}>Comptes</div>
+              <div className={`tab ${onglet === 2 ? 'active' : ''}`} onClick={ () => {setOnglet(2)}}>Factures-services</div>
             </div>
             <div className="onglets-contenu">
                 {contenu}
@@ -125,12 +126,13 @@ function App() {
         <main className='app'>
           <Entete nomConnecte={nomConnecte} setConnecter={setConnecter} setOnglet={setOnglet} role={role} />
           <section className="conteneur-onglets">
-            <div className="onglets-blocs" style={{width: '70%'}}>
+            <div className="onglets-blocs" style={{width: '80%'}}>
               <div className={`tab ${onglet === 5 ? 'active' : ''}`} onClick={ () => {setOnglet(5)}}>Les états</div>
               <div className={`tab ${onglet === 8 ? 'active' : ''}`} onClick={ () => {setOnglet(8)}}>Aperçu</div>
               <div className={`tab ${onglet === 3 ? 'active' : ''}`} onClick={ () => {setOnglet(3)}}>Historique</div>
               <div className={`tab ${onglet === 11 ? 'active' : ''}`} onClick={ () => {setOnglet(11)}}>Modifier</div>
               <div className={`tab ${onglet === 4 ? 'active' : ''}`} onClick={ () => {setOnglet(4)}}>Comptes</div>
+              <div className={`tab ${onglet === 2 ? 'active' : ''}`} onClick={ () => {setOnglet(2)}}>Factures-services</div>
             </div>
             <div className="onglets-contenu">
                 {contenu}
