@@ -565,7 +565,6 @@ export default function GestionFactures(props) {
                                     resteaPayer={resteaPayer}
                                     date={factureSelectionne[0].date_heure}
                                     caissier={props.nomConnecte}
-                                    patient={factureSelectionne[0].patient}
                                     assurance={factureSelectionne[0].assurance}
                                 />
                             </div>

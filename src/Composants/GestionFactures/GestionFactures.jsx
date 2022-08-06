@@ -306,7 +306,7 @@ export default function GestionFactures(props) {
             <div className="liste-medoc">
 
                 <p className="search-zone">
-                    <input type="text" placeholder="N° facture" onChange={filtrerListe} />
+                    <input type="text" placeholder="Nom patient" onChange={filtrerListe} />
                 </p>
                 {/* <p>
                     <label htmlFor="" style={{marginRight: 5, fontWeight: 700}}>Non réglés</label>
@@ -408,6 +408,7 @@ export default function GestionFactures(props) {
                                 resteaPayer={factureSelectionne[0].reste_a_payer}
                                 date={factureSelectionne[0].date_heure}
                                 nomConnecte={factureSelectionne[0].caissier}
+                                montantFrais={factureSelectionne[0].frais}
                                 />
                             </div>
                         )}

@@ -54,7 +54,7 @@ export default function GestionRecette(props) {
     let heure_select1 = useRef();
     let heure_select2 = useRef();
 
-    const date_e = new Date('2022-08-19');
+    const date_e = new Date('2022-12-19');
     const date_j = new Date();
 
     const componentRef = useRef();

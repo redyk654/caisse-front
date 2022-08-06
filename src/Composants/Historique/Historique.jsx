@@ -15,7 +15,7 @@ export default function Historique(props) {
     let heure_select2 = useRef();
     const componentRef = useRef();
 
-    const date_e = new Date('2022-08-19');
+    const date_e = new Date('2022-12-19');
     const date_j = new Date();
 
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);

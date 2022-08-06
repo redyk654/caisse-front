@@ -57,7 +57,7 @@ export default function Comptes(props) {
         req.addEventListener('load', () => {
             if(req.status >= 200 && req.status < 400) {
                 let result = JSON.parse(req.responseText);
-                result = result.filter(item => (item.rol === "caissier"))
+                result = result.filter(item => (item.nom_user !== props.nomConnecte))
                 setListeComptes(result);
             }
         });

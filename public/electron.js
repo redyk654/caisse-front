@@ -8,7 +8,7 @@ function createWindow () {
     height: 900,
     minWidth: 1000,
     minHeight: 700,
-    icon: path.join(__dirname, '../public/services.png'),
+    icon: path.join(__dirname, '../public/icon.ico'),
     webPreferences: {
       nodeIntegration: true
     }

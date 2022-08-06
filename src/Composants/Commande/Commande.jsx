@@ -91,7 +91,7 @@ export default function Commande(props) {
     const autre  = {designation: '', prix: ''};
     const assuranceDefaut = 'aucune';
 
-    const date_e = new Date('2022-08-19');
+    const date_e = new Date('2022-12-19');
     const date_j = new Date();
 
     const [listeMedoc, setListeMedoc] = useState([]);
@@ -396,8 +396,6 @@ export default function Commande(props) {
         req.addEventListener('load', () => {
             setMedoSelect(false);
             setMessageErreur('');
-            setFrais(false);
-            setMontantFrais(0);
             // setActualiserQte(!actualiserQte);
             // Activation de la fenêtre modale qui indique la réussite de la commmande
             setModalReussi(true);
@@ -937,6 +935,7 @@ export default function Commande(props) {
                                 relicat={relicat}
                                 resteaPayer={resteaPayer}
                                 nomConnecte={props.nomConnecte}
+                                montantFrais={montantFrais}
                             />
                         </div>
                     </div>
