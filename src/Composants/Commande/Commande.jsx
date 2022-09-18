@@ -86,6 +86,7 @@ const styleBox = {
 export default function Commande(props) {
 
     const componentRef = useRef();
+    const annuler = useRef();
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);
 
     const autre  = {designation: '', prix: ''};
@@ -466,6 +467,7 @@ export default function Commande(props) {
             setidFacture(id);
             let i = 0;
             document.querySelector('.valider').disabled = true;
+            annuler.current.disabled = true;
 
             medocCommandes.map(item => {
 
@@ -533,32 +535,35 @@ export default function Commande(props) {
     }
 
     const handleClick = (e) => {
-        if (medocCommandes.length > 0) {
+        if (medocCommandes.length > 0 && verse !== "") {
             setmontantVerse(verse);
             setverse('');
+            setMessageErreur('');
         }
     }
 
     const ajouterPatient = () => {
-        setNomPatient(patient.trim());
-        setpatient('');
+        if(patient !== "") {
+            setNomPatient(patient.trim());
+            setpatient('');
 
-        if(assurance.toLowerCase() !== assuranceDefaut) {
-            if(parseInt(qtePrixTotal.a_payer)) {
-                Object.defineProperty(qtePrixTotal, 'a_payer', {
-                    value: (parseInt(qtePrixTotal.prix_total) * (100 - typeAssurance)) / 100,
-                    configurable: true,
-                    enumerable: true,
-                });
+            if(assurance.toLowerCase() !== assuranceDefaut) {
+                if(parseInt(qtePrixTotal.a_payer)) {
+                    Object.defineProperty(qtePrixTotal, 'a_payer', {
+                        value: (parseInt(qtePrixTotal.prix_total) * (100 - typeAssurance)) / 100,
+                        configurable: true,
+                        enumerable: true,
+                    });
+                }
+                setStatu('pending');
+            } else {
+                setStatu('done');
             }
-            setStatu('pending');
-        } else {
-            setStatu('done');
-        }
 
-        setStatePourRerender(!statePourRerender);
-        fermerModalPatient();
-        setMessageErreur('')
+            setStatePourRerender(!statePourRerender);
+            fermerModalPatient();
+            setMessageErreur('');
+        }
     }
 
     const demanderConfirmation = () => {
@@ -721,7 +726,7 @@ export default function Commande(props) {
 
         const req = new XMLHttpRequest();
 
-        req.open('GET', `http://serveur/backend-cma/rechercher_patient.php?str=${e.target.value}`);
+        req.open('GET', `http://serveur/backend-cma/rechercher_patient.php?str=${(e.target.value).trim()}`);
 
         req.addEventListener('load', () => {
             if (req.status >= 200 && req.status < 400) {
@@ -790,7 +795,7 @@ export default function Commande(props) {
             >
                 <h2 style={{color: '#fff'}}>êtes-vous sûr de vouloir valider cette facture ?</h2>
                 <div style={{textAlign: 'center'}} className='modal-button'>
-                    <button  style={{width: '20%', height: '5vh', cursor: 'pointer', marginRight: '10px'}} onClick={fermerModalConfirmation}>Annuler</button>
+                    <button ref={annuler}  style={{width: '20%', height: '5vh', cursor: 'pointer', marginRight: '10px'}} onClick={fermerModalConfirmation}>Annuler</button>
                     <button className="valider" style={{width: '20%', height: '5vh', cursor: 'pointer'}} onClick={validerCommande}>Confirmer</button>
                 </div>
             </Modal>
