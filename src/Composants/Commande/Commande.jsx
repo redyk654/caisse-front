@@ -87,6 +87,7 @@ export default function Commande(props) {
 
     const componentRef = useRef();
     const annuler = useRef();
+    const btnAjout = useRef();
     const {chargement, stopChargement, startChargement} = useContext(ContextChargement);
 
     const autre  = {designation: '', prix: ''};
@@ -295,6 +296,13 @@ export default function Commande(props) {
             - Mise à jour de la quantité total des médicaments commandés
             - Mise à jour du prix total de la commande
         */
+
+        btnAjout.current.disabled = true;
+        setTimeout(() => {
+            btnAjout.current.disabled = false;
+        }, 1000);
+        // Desactive le bouton d'ajout quelques secondes
+
         if (qteDesire && !isNaN(qteDesire) && medocSelect) {
 
             setMessageErreur('');
@@ -584,6 +592,7 @@ export default function Commande(props) {
     const infosPatient = () => {
 
         // Affiche la fenêtre des informations du patient
+        setpatient('');
         setoption('patient');
         setModalPatient(true);
 
@@ -848,7 +857,7 @@ export default function Commande(props) {
                 </div>
                 <div className="box" style={{marginLeft: 5}}>
                     <div className="detail-item">
-                        <button style={{backgroundColor: '#6d6f94'}} onClick={ajouterMedoc}>ajouter</button>
+                        <button ref={btnAjout} style={{backgroundColor: '#6d6f94'}} onClick={ajouterMedoc}>ajouter</button>
                         <button style={{backgroundColor: '#6d6f94', marginLeft: '5px'}} onClick={fraisMateriel}>+500</button>
                     </div>
                     <div style={{textAlign: 'center'}}>

@@ -246,6 +246,7 @@ export default function GestionFactures(props) {
                 detailsFacture.map(item => {
                     const data1 = new FormData();
                     data1.append('produit', JSON.stringify(item));
+                    data1.append('caissier', props.nomConnecte);
 
                     const req1 = new XMLHttpRequest();
                     req1.open('POST', 'http://serveur/backend-cma/maj_medocs.php');

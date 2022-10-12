@@ -4,9 +4,10 @@
   "copyright": "Copyright © 2022 Chrisppo Youmbissi",
   "name": "Caisse-Bepanda",
   "author": "Chrisppo Youmbissi Kamdem",
-  "version": "2.1.0",
-  "app": "public/icon.ico",
-
+  "version": "2.1.1",
+  "win": {
+    "icon": "./public/icon.ico"
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
