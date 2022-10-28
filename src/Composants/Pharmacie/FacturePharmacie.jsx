@@ -90,6 +90,7 @@ export default class FacturePharmacie extends Component {
                             <div style={{marginTop: 5}}>Facture N°<span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.idFacture}</span></div>
                             <div style={{marginTop: '5px'}}>Le <strong>{this.mois(this.props.date.substring(0, 10))}</strong> à <strong>{this.props.date.substring(11, 19)}</strong></div>
                             <div style={{marginTop: 5, textTransform: 'capitalize'}}>patient : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.patient}</span></div>
+                            <div style={{marginTop: 5,}}>code : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.codePatient}</span></div>
                             {this.props.assurance !== "aucune" ? (
                                 <div style={{marginTop: 3}}>couvert par : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.assurance.toUpperCase()}</span></div>
                             ) : null}
@@ -159,6 +160,7 @@ export default class FacturePharmacie extends Component {
                         <div style={{marginTop: 5}}>Facture N°<span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.idFacture}</span></div>
                         <div style={{marginTop: '5px'}}>Le <strong>{this.mois(this.props.date.substring(0, 10))}</strong> à <strong>{this.props.date.substring(11, 19)}</strong></div>
                         <div style={{marginTop: 5, textTransform: 'capitalize'}}>patient : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.patient}</span></div>
+                        <div style={{marginTop: 5,}}>code : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.codePatient}</span></div>
                         {this.props.assurance !== "aucune" ? (
                                 <div style={{marginTop: 3}}>couvert par : <span style={{fontWeight: '600', marginTop: '15px'}}>{this.props.assurance.toUpperCase()}</span></div>
                         ) : null}

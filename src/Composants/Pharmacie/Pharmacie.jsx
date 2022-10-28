@@ -491,6 +491,7 @@ export default function GestionFactures(props) {
                         <div>Le <strong>{factureSelectionne.length > 0 && mois(factureSelectionne[0].date_heure.substring(0, 11))}</strong> à <strong>{factureSelectionne.length > 0 && factureSelectionne[0].date_heure.substring(11, )}</strong></div>
                     </div>
                     <div style={{marginTop: 5}}>patient : <span style={{fontWeight: '600', marginTop: '15px'}}>{factureSelectionne.length > 0 && factureSelectionne[0].patient}</span></div>
+                    <div style={{marginTop: 5}}>code : <span style={{fontWeight: '600', marginTop: '15px'}}>{factureSelectionne.length > 0 && factureSelectionne[0].code_patient}</span></div>
                     {factureSelectionne.length > 0 && factureSelectionne[0].assurance !== "aucune" ? <div>couvert par : <strong>{factureSelectionne[0].assurance.toUpperCase()}</strong></div> : null}
                     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: 20, width: '100%'}}>
                         <table style={table_styles}>
@@ -558,6 +559,7 @@ export default function GestionFactures(props) {
                                     medocCommandes={detailsFacture}
                                     idFacture={factureSelectionne[0].id}
                                     patient={factureSelectionne[0].patient}
+                                    codePatient={factureSelectionne[0].code_patient}
                                     prixTotal={factureSelectionne[0].prix_total}
                                     reduction={factureSelectionne[0].reduction}
                                     aPayer={factureSelectionne[0].a_payer}
