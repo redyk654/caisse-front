@@ -193,8 +193,8 @@ export default function FacturesAssurances() {
         setListeClients(listeClientsSauvegarde.filter(item => (item.nom.toLowerCase().indexOf(e.target.value.toLowerCase()) !== -1)));
     }
 
-    const afficherInfos = (e, id_facture, nom, total, type_assurance, periode) => {
-        setClientSelect([{nom: nom, id_facture: id_facture, total: total, type_assurance: type_assurance, periode: periode,}]);
+    const afficherInfos = (e, id_facture, nom, code_patient, total, type_assurance, periode) => {
+        setClientSelect([{nom: nom, code_patient: code_patient, id_facture: id_facture, total: total, type_assurance: type_assurance, periode: periode,}]);
     }
 
     const extraireCode = (designation) => {
@@ -260,7 +260,7 @@ export default function FacturesAssurances() {
                     <h1>Listes des clients</h1>
                     <ul>
                         {listeClients.length > 0 && listeClients.map(item => (
-                            <li value={item.id} key={item.id_fac} onClick={(e) => afficherInfos(e, item.id_facture, item.nom, item.total, item.assurance_type, item.periode)}>{item.nom}</li>
+                            <li value={item.id} key={item.id_fac} onClick={(e) => afficherInfos(e, item.id_facture, item.nom, item.code_patient, item.total, item.assurance_type, item.periode)}>{item.nom}</li>
                         ))}
                     </ul>
                 </div>
@@ -270,11 +270,13 @@ export default function FacturesAssurances() {
                 {clientSelect.length === 1 && (
                     <div style={{textAlign: 'center', lineHeight: '28px'}}>
                         <div>Nom : <span style={{fontWeight: '600'}}>{clientSelect[0].nom}</span></div>
+                        <div>Code : <span style={{fontWeight: '600'}}>{clientSelect[0].code_patient}</span></div>
                         <div>Couvert par : <span style={{fontWeight: '600'}}>{assurance}</span></div>
                         <div>Pourcentage : <span style={{fontWeight: '600'}}>{clientSelect[0].type_assurance}</span></div>
                         <div>Periode <span style={{fontWeight: '600'}}>{clientSelect[0].periode}</span></div>
                         <div>Total : <span style={{fontWeight: '600'}}>{clientSelect[0].total + ' Fcfa'}</span></div>
-                        <div>Restant à payer : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
+                        <div>Payé par assurance : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
+                        <div>Restant à payer : <span style={{fontWeight: '600'}}>{'0 Fcfa'}</span></div>
                     </div>
                 )}
                 <div className="details-commande">

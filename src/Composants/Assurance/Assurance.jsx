@@ -57,6 +57,7 @@ export default function Assurance() {
 
     let date_select1 = useRef();
     let date_select2 = useRef();
+    let btnSauvegarde = useRef();
 
     const [listeClients, setListeClients] = useState([]);
     const [listeClientsSauvegarde, setListeClientsSauvegarde] = useState([]);
@@ -308,13 +309,12 @@ export default function Assurance() {
         console.log(result);
 
         result.forEach(item => {
-            if (clients.indexOf(item.patient) === -1) {
-                clients.push(item.patient);
-                listeProvisoiresClient.push({id_fac: item.id_fac, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), frais: parseInt(item.frais), type_assurance: item.type_assurance, assurance: item.assurance});
+            if (clients.indexOf(item.code_patient) === -1) {
+                clients.push(item.code_patient);
+                listeProvisoiresClient.push({id_fac: item.id_fac, code_patient: item.code_patient, nom: item.patient, factures: [item.id], total: parseInt(item.prix_total), frais: parseInt(item.frais), type_assurance: item.type_assurance, assurance: item.assurance});
             } else {
                 listeProvisoiresClient.forEach(item2 => {
-                    if (item.patient === item2.nom){
-                        console.log(item.frais);
+                    if (item.code_patient === item2.code_patient){
                         item2.factures.push(item.id);
                         if (item.frais) {
                             item2.frais += parseInt(item.frais);
@@ -330,9 +330,9 @@ export default function Assurance() {
         setListeClientsSauvegarde(listeProvisoiresClient);
     }
 
-    const afficherInfos = (e, nom, frais, factures, total, type_assurance, assurance) => {
+    const afficherInfos = (e, nom, code_patient, frais, factures, total, type_assurance, assurance) => {
         setInfosClient([]);
-        setClientSelect([{nom: nom, frais: frais, factures: factures, total: total, type_assurance: type_assurance, assurance: assurance}]);
+        setClientSelect([{nom: nom, code_patient: code_patient, frais: frais, factures: factures, total: total, type_assurance: type_assurance, assurance: assurance}]);
     }
 
     const idUnique = () => {
@@ -367,10 +367,12 @@ export default function Assurance() {
                         req2.addEventListener('load', () => {
                             i++;
                             if (clientSelect[0].factures.length === i) {
-                                setListeClients(listeClients.filter(item => (item.nom.toLowerCase() !== clientSelect[0].nom.toLowerCase())));
-                                setListeClientsSauvegarde(listeClients.filter(item => (item.nom.toLowerCase() !== clientSelect[0].nom.toLowerCase())));
+                                setListeClients(listeClients.filter(item => (item.code_patient.toLowerCase() !== clientSelect[0].code_patient.toLowerCase())));
+                                setListeClientsSauvegarde(listeClients.filter(item => (item.code_patient.toLowerCase() !== clientSelect[0].code_patient.toLowerCase())));
                                 setClientSelect([]);
                                 setInfosClient([]);
+                                btnSauvegarde.current.disabled = false;
+
                             }
                         });
 
@@ -388,10 +390,12 @@ export default function Assurance() {
     const sauvegarderFacture = () => {
         // Sauvegarde d'une facture d'assurance
         if (clientSelect.length > 0) {
+            btnSauvegarde.current.disabled = true;
             const id = idUnique();
             const data = new FormData();
             data.append('id_facture', id);
             data.append('nom', clientSelect[0].nom);
+            data.append('code_patient', clientSelect[0].code_patient);
             data.append('assurance', assurance);
             data.append('assurance_type', clientSelect[0].type_assurance);
             data.append('periode', "du " + mois2(dateInf) + " au " + mois2(dateSup));
@@ -432,9 +436,18 @@ export default function Assurance() {
         });
     }
 
+    const creerCodePatient = () => {
+        // Création d'un code unique pour le patient
+        let d = new Date();
+        return d.toLocaleString().substring(15,17) + Math.floor((1 + Math.random()) * 0x100000)
+               .toString(16)
+               .substring(1);
+    }
+
     const ajouterPatient = () => {
         const data = new FormData();
         data.append('nom_patient', patient);
+        data.append('code_patient', creerCodePatient());
         data.append('assurance', assuranceClient);
         data.append('type_assurance', typeAssurance);
         
@@ -671,7 +684,7 @@ export default function Assurance() {
                     <h1>Listes des clients</h1>
                     <ul>
                         {listeClients.length > 0 && listeClients.map(item => (
-                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.frais, item.factures, item.total, item.type_assurance, item.assurance)}>{item.nom}</li>
+                            <li value={item.id_fac} key={item.id_fac} onClick={(e) => afficherInfos(e, item.nom, item.code_patient, item.frais, item.factures, item.total, item.type_assurance, item.assurance)}>{item.nom}</li>
                         ))}
                     </ul>
                 </div>
@@ -681,10 +694,11 @@ export default function Assurance() {
                 {clientSelect.length === 1 && (
                     <div style={{textAlign: 'center', lineHeight: '28px'}}>
                         <div>Nom et prénom : <span style={{fontWeight: '600'}}>{clientSelect[0].nom}</span></div>
+                        <div>Code : <span style={{fontWeight: '600'}}>{clientSelect[0].code_patient}</span></div>
                         <div>Couvert par : <span style={{fontWeight: '600'}}>{clientSelect[0].assurance}</span></div>
                         <div>Pourcentage : <span style={{fontWeight: '600'}}>{clientSelect[0].type_assurance}</span></div>
                         <div>Periode : <span style={{fontWeight: '600'}}>{mois2(dateInf)}</span> au <span style={{fontWeight: '600'}}>{mois2(dateSup)}</span></div>
-                        <div>Frais matériel : <span style={{fontWeight: '600'}}>{clientSelect[0].frais + ' Fcfa'}</span></div>
+                        <div>Frais matériel : <span style={{fontWeight: '600'}}>{isNaN(clientSelect[0].frais) ? '0 Fcfa' : clientSelect[0].frais + ' Fcfa'}</span></div>
                         <div>Total : <span style={{fontWeight: '600'}}>{clientSelect[0].total + ' Fcfa'}</span></div>
                         <div>Restant à payer : <span style={{fontWeight: '600'}}>{(parseInt(clientSelect[0].total) * (parseInt(clientSelect[0].type_assurance) / 100)) + ' Fcfa'}</span></div>
                     </div>
@@ -759,7 +773,7 @@ export default function Assurance() {
                                 <ExcelColumn label="restant" value="reste" />
                             </ExcelSheet>
                         </ExcelFile>
-                        <button id="btn-save" onClick={sauvegarderFacture}>Terminer</button>
+                        <button id="btn-save" ref={btnSauvegarde} onClick={sauvegarderFacture}>Terminer</button>
                     </div>
                 </div>
             </div>
